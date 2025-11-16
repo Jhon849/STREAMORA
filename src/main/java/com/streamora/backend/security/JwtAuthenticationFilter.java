@@ -38,13 +38,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String token = authHeader.substring(7);
-        final String email = jwtService.extractEmail(token);
+        final String username = jwtService.extractUsername(token);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        // ⬇️ Aquí estaba tu error: "email" no existe
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            User user = userRepository.findByEmail(email).orElse(null);
+            User user = userRepository.findByUsername(username).orElse(null);
 
-            if (user != null) {
+            if (user != null && jwtService.isTokenValid(token, username)) {
+
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         user,
                         null,
@@ -62,3 +64,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
+
