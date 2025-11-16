@@ -11,3 +11,4 @@ public class RegisterRequest {
     private String displayName;
     private String role;
 }
+
