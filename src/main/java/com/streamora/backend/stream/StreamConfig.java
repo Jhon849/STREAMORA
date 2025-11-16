@@ -5,12 +5,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "stream_config")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "stream_configs")
 public class StreamConfig {
 
     @Id
@@ -18,14 +18,20 @@ public class StreamConfig {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", unique = true)
     private User user;
 
+    @Column(nullable = false)
     private String streamKey;
 
     private String title;
 
     private String category;
 
-    private boolean live;
+    @Column(nullable = false)
+    private boolean isLive;
+
+    private String ingestUrl;   // RTMP ingest
+    private String playbackUrl; // HLS playback
 }
+

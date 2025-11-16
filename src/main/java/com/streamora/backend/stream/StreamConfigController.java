@@ -10,33 +10,27 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class StreamConfigController {
 
-    private final StreamConfigService streamConfigService;
+    private final StreamConfigService service;
 
-    @PostMapping("/{userId}/init")
-    public ResponseEntity<StreamConfig> init(@PathVariable Long userId) {
-        return ResponseEntity.ok(streamConfigService.initStreamConfig(userId));
+    @GetMapping("/{userId}")
+    public ResponseEntity<StreamConfig> getConfig(@PathVariable Long userId) {
+        return ResponseEntity.ok(service.createOrGetConfig(userId));
     }
 
-    @PutMapping("/{userId}/settings")
-    public ResponseEntity<StreamConfig> updateSettings(
+    @PutMapping("/{userId}/title")
+    public ResponseEntity<StreamConfig> updateTitle(
             @PathVariable Long userId,
-            @RequestBody StreamConfig req
+            @RequestParam String title
     ) {
-        return ResponseEntity.ok(
-                streamConfigService.updateStream(userId, req.getTitle(), req.getCategory())
-        );
+        return ResponseEntity.ok(service.updateTitle(userId, title));
     }
 
-    @PutMapping("/{userId}/regenerate-key")
-    public ResponseEntity<StreamConfig> regenerateKey(@PathVariable Long userId) {
-        return ResponseEntity.ok(streamConfigService.regenerateStreamKey(userId));
-    }
-
-    @PutMapping("/{userId}/live/{state}")
-    public ResponseEntity<StreamConfig> setLiveState(
+    @PutMapping("/{userId}/category")
+    public ResponseEntity<StreamConfig> updateCategory(
             @PathVariable Long userId,
-            @PathVariable boolean state
+            @RequestParam String category
     ) {
-        return ResponseEntity.ok(streamConfigService.setLiveState(userId, state));
+        return ResponseEntity.ok(service.updateCategory(userId, category));
     }
 }
+

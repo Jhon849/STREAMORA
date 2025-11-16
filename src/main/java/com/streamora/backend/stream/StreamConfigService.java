@@ -5,53 +5,45 @@ import com.streamora.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
-import java.util.Base64;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class StreamConfigService {
 
-    private final StreamConfigRepository streamConfigRepository;
+    private final StreamConfigRepository repository;
     private final UserRepository userRepository;
 
-    private String generateStreamKey() {
-        byte[] randomBytes = new byte[32];
-        new SecureRandom().nextBytes(randomBytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+    public StreamConfig createOrGetConfig(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return repository.findByUser(user).orElseGet(() -> {
+            StreamConfig cfg = StreamConfig.builder()
+                    .user(user)
+                    .streamKey(UUID.randomUUID().toString().replace("-", "").substring(0, 25))
+                    .title("Nuevo directo")
+                    .category("General")
+                    .isLive(false)
+                    .ingestUrl("rtmp://stream.streamora.space/live")
+                    .playbackUrl("https://stream.streamora.space/hls/" + userId + ".m3u8")
+                    .build();
+
+            return repository.save(cfg);
+        });
     }
 
-    public StreamConfig initStreamConfig(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow();
-
-        return streamConfigRepository.findByUser(user)
-                .orElseGet(() -> streamConfigRepository.save(
-                        StreamConfig.builder()
-                                .user(user)
-                                .streamKey(generateStreamKey())
-                                .title("My Stream")
-                                .category("Just Chatting")
-                                .live(false)
-                                .build()
-                ));
+    public StreamConfig updateTitle(Long userId, String title) {
+        StreamConfig cfg = createOrGetConfig(userId);
+        cfg.setTitle(title);
+        return repository.save(cfg);
     }
 
-    public StreamConfig updateStream(Long userId, String title, String category) {
-        StreamConfig config = initStreamConfig(userId);
-        config.setTitle(title);
-        config.setCategory(category);
-        return streamConfigRepository.save(config);
-    }
-
-    public StreamConfig regenerateStreamKey(Long userId) {
-        StreamConfig config = initStreamConfig(userId);
-        config.setStreamKey(generateStreamKey());
-        return streamConfigRepository.save(config);
-    }
-
-    public StreamConfig setLiveState(Long userId, boolean live) {
-        StreamConfig config = initStreamConfig(userId);
-        config.setLive(live);
-        return streamConfigRepository.save(config);
+    public StreamConfig updateCategory(Long userId, String category) {
+        StreamConfig cfg = createOrGetConfig(userId);
+        cfg.setCategory(category);
+        return repository.save(cfg);
     }
 }
+
