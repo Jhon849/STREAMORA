@@ -1,6 +1,5 @@
 package com.streamora.backend.security;
 
-import com.streamora.backend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @RequiredArgsConstructor
@@ -24,7 +24,13 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // Permitir todos los POST sin autenticación
+                        .requestMatchers(HttpMethod.POST, "/**").permitAll()
+
+                        // Permitir también todos los endpoints de /api/auth
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // Todos los demás endpoints requieren token
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -32,11 +38,11 @@ public class SecurityConfig {
                 .build();
     }
 
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }
+
 
 

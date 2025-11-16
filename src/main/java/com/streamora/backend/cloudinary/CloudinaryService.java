@@ -17,11 +17,16 @@ public class CloudinaryService {
 
     public Map uploadImage(MultipartFile file) {
         try {
-            return cloudinary.uploader().upload(file.getBytes(),
-                    ObjectUtils.asMap("resource_type", "image"));
+            return cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "resource_type", "image"
+                    )
+            );
         } catch (IOException e) {
-            throw new RuntimeException("Error subiendo imagen", e);
+            throw new RuntimeException("Error subiendo imagen: " + e.getMessage());
         }
     }
 }
+
 
