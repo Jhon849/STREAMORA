@@ -13,13 +13,11 @@ public class UploadController {
     private final CloudinaryService cloudinaryService;
 
     @PostMapping("/image")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadImage(
+            @RequestParam("file") MultipartFile file
+    ) {
         return ResponseEntity.ok(cloudinaryService.uploadImage(file));
     }
-
-    @PostMapping("/video")
-    public ResponseEntity<?> uploadVideo(@RequestParam("file") MultipartFile file) {
-        return ResponseEntity.ok(cloudinaryService.uploadVideo(file));
-    }
 }
+
 

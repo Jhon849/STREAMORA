@@ -23,13 +23,5 @@ public class CloudinaryService {
             throw new RuntimeException("Error subiendo imagen", e);
         }
     }
-
-    public Map uploadVideo(MultipartFile file) {
-        try {
-            return cloudinary.uploader().upload(file.getBytes(),
-                    ObjectUtils.asMap("resource_type", "video"));
-        } catch (IOException e) {
-            throw new RuntimeException("Error subiendo video", e);
-        }
-    }
 }
+
