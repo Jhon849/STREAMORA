@@ -1,14 +1,13 @@
 package com.streamora.backend.auth;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter @Setter
+@Data
 public class RegisterRequest {
     private String username;
     private String email;
     private String password;
     private String displayName;
-    private String role;
 }
+
 
