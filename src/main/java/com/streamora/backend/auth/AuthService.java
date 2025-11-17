@@ -1,43 +1,48 @@
 package com.streamora.backend.auth;
 
+import com.streamora.backend.security.jwt.JwtProvider;
 import com.streamora.backend.user.User;
 import com.streamora.backend.user.UserRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final JwtService jwtService;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private JwtProvider jwtProvider;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public AuthResponse register(RegisterRequest request) {
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+    public void register(RegisterRequest request) {
+
+        User user = new User(
+                request.username,
+                request.displayName,
+                request.email,
+                passwordEncoder.encode(request.password),
+                request.role == null ? "USER" : request.role
+        );
 
         userRepository.save(user);
-
-        String token = jwtService.generateToken(user.getEmail());
-
-        return new AuthResponse(token);
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email no encontrado"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Contraseña incorrecta");
+        User user = userRepository.findByEmail(request.email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.password, user.getPassword())) {
+            throw new RuntimeException("Incorrect password");
         }
 
-        String token = jwtService.generateToken(user.getEmail());
+        String token = jwtProvider.generateToken(user.getUsername());
 
-        return new AuthResponse(token);
+        return new AuthResponse(token, user.getUsername(), user.getEmail(), user.getRole());
     }
 }
 
