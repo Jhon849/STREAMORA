@@ -2,18 +2,11 @@ package com.streamora.backend.video;
 
 import com.streamora.backend.user.User;
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "videos")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Video {
 
     @Id
@@ -21,30 +14,30 @@ public class Video {
     private Long id;
 
     private String title;
-
-    @Column(columnDefinition = "TEXT")
     private String description;
-
     private String url;
-
-    private String thumbnail;
-
-    private String category;
-
-    private Long views;
-
-    private Long likes;
-
-    private Long dislikes;
-
-    private boolean isPublic;
 
     private LocalDateTime createdAt;
 
-    @ElementCollection
-    private List<String> tags;
+    private int views;
+    private int likes;
+    private int dislikes;
+
+    private boolean isPublic;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "owner_id")
     private User owner;
+
+    public Video() {
+        this.createdAt = LocalDateTime.now();
+        this.isPublic = true;
+    }
+
+    // GETTERS & SETTERS
+    // igual que antes pero sin Neo4j
 }
+
+
+
+

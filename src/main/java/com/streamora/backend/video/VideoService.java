@@ -21,21 +21,23 @@ public class VideoService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         video.setOwner(owner);
-        video.setViews(0L);
-        video.setLikes(0L);
-        video.setDislikes(0L);
         video.setCreatedAt(LocalDateTime.now());
+        video.setViews(0);
+        video.setLikes(0);
+        video.setDislikes(0);
+        video.setPublic(true);
 
         return videoRepository.save(video);
     }
 
     public List<Video> getAllPublic() {
-        return videoRepository.findAll().stream()
+        return videoRepository.findAll()
+                .stream()
                 .filter(Video::isPublic)
                 .toList();
     }
 
-    public Optional<Video> getById(Long id) {
+    public Optional<Video> getById(String id) {
         return videoRepository.findById(id);
     }
 
@@ -43,11 +45,11 @@ public class VideoService {
         return videoRepository.findByTitleContainingIgnoreCase(title);
     }
 
-    public void delete(Long id) {
+    public void delete(String id) {
         videoRepository.deleteById(id);
     }
 
-    public Video addView(Long id) {
+    public Video addView(String id) {
         Video v = videoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Video not found"));
 
@@ -55,17 +57,20 @@ public class VideoService {
         return videoRepository.save(v);
     }
 
-    public Video like(Long id) {
+    public Video like(String id) {
         Video v = videoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Video not found"));
+
         v.setLikes(v.getLikes() + 1);
         return videoRepository.save(v);
     }
 
-    public Video dislike(Long id) {
+    public Video dislike(String id) {
         Video v = videoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Video not found"));
+
         v.setDislikes(v.getDislikes() + 1);
         return videoRepository.save(v);
     }
 }
+

@@ -6,18 +6,18 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/upload")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class UploadController {
 
     private final CloudinaryService cloudinaryService;
 
-    @PostMapping("/image")
-    public ResponseEntity<?> uploadImage(
-            @RequestParam("file") MultipartFile file
-    ) {
-        return ResponseEntity.ok(cloudinaryService.uploadImage(file));
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
+        var result = cloudinaryService.uploadImage(file);
+        return ResponseEntity.ok(result);
     }
 }
+
 
 
