@@ -1,12 +1,15 @@
 package com.streamora.backend.stream;
 
+import com.streamora.backend.cloud.CloudinaryService;
 import com.streamora.backend.stream.dto.CreateStreamRequest;
 import com.streamora.backend.stream.dto.StreamResponse;
 import com.streamora.backend.user.User;
 import com.streamora.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -18,20 +21,18 @@ public class StreamService {
 
     private final StreamRepository streamRepository;
     private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService;
 
-    // TODO: Replace with your real RTMP server URL later
     private final String RTMP_BASE = "rtmp://your-rtmp-server/live";
     private final String HLS_BASE  = "https://your-rtmp-server/hls/";
 
     public StreamResponse createStream(Long userId, CreateStreamRequest request) {
 
-        // 👇 Intentamos buscar el usuario, pero ya NO lanzamos excepción si no existe
         Optional<User> optionalUser = userRepository.findById(userId);
-
-        User user = optionalUser.orElse(null); // Puede ser null, no rompemos
+        User user = optionalUser.orElse(null);
 
         Stream stream = Stream.builder()
-                .user(user) // si user es null, igual se guarda
+                .user(user)
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .category(request.getCategory())
@@ -63,6 +64,19 @@ public class StreamService {
                 .collect(Collectors.toList());
     }
 
+    // ⭐ Subir thumbnail del stream
+    public StreamResponse uploadThumbnail(Long streamId, MultipartFile file) throws IOException {
+        Stream stream = streamRepository.findById(streamId)
+                .orElseThrow(() -> new RuntimeException("Stream no encontrado"));
+
+        String url = cloudinaryService.upload(file);
+        stream.setThumbnailUrl(url);
+
+        streamRepository.save(stream);
+
+        return mapToResponse(stream);
+    }
+
     private StreamResponse mapToResponse(Stream stream) {
         return StreamResponse.builder()
                 .id(stream.getId())
@@ -77,4 +91,5 @@ public class StreamService {
                 .build();
     }
 }
+
 

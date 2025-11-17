@@ -1,50 +1,44 @@
 package com.streamora.backend.user;
 
+import com.streamora.backend.cloud.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService;
 
-    public User createUser(String username, String email, String encryptedPassword, UserRole role) {
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 
-        User user = User.builder()
-                .username(username)
-                .email(email)
-                .password(encryptedPassword)
-                .role(role)
-                .avatarUrl(null)
-                .createdAt(LocalDateTime.now())
-                .build();
+    public User getUser(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    public User uploadAvatar(Long id, MultipartFile file) throws IOException {
+        User user = getUser(id);
+
+        String url = cloudinaryService.upload(file);
+        user.setAvatarUrl(url);
 
         return userRepository.save(user);
     }
 
-    public Optional<User> getByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
+    public User uploadBanner(Long id, MultipartFile file) throws IOException {
+        User user = getUser(id);
 
-    public Optional<User> getByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
+        String url = cloudinaryService.upload(file);
+        user.setBannerUrl(url);
 
-    public boolean emailExists(String email) {
-        return userRepository.existsByEmail(email);
-    }
-
-    public boolean usernameExists(String username) {
-        return userRepository.existsByUsername(username);
-    }
-
-    // 🔥 ADDED: List all users (to know user IDs and debug)
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userRepository.save(user);
     }
 }
