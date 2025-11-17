@@ -1,40 +1,25 @@
 package com.streamora.backend.user;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import com.streamora.backend.user.dto.UpdateProfileDTO;
+import com.streamora.backend.user.dto.UserProfileDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/users")
-@RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@RequestMapping("/user")
 public class UserController {
 
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
 
-    @GetMapping
-    public ResponseEntity<List<User>> getAll() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    @GetMapping("/me")
+    public UserProfileDTO getProfile(@RequestAttribute("username") String username) {
+        return userService.getProfile(username);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getById(@PathVariable Long id) {
-        return userService.getById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public ResponseEntity<User> create(@RequestBody User user) {
-        return ResponseEntity.ok(userService.create(user));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        userService.delete(id);
-        return ResponseEntity.ok().build();
+    @PutMapping("/me")
+    public UserProfileDTO updateProfile(@RequestAttribute("username") String username,
+                                        @RequestBody UpdateProfileDTO dto) {
+        return userService.updateProfile(username, dto);
     }
 }
-

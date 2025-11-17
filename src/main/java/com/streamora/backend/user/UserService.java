@@ -1,48 +1,57 @@
 package com.streamora.backend.user;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.streamora.backend.user.dto.UpdateProfileDTO;
+import com.streamora.backend.user.dto.UserProfileDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
+    private String avatarUrl;
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+public String getAvatarUrl() { return avatarUrl; }
+public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+
+
+    public UserProfileDTO getProfile(String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return new UserProfileDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getDisplayName(),
+                user.getRole(),
+                null // avatarUrl después con Cloudinary
+        );
     }
 
-    public Optional<User> getById(Long id) {
-        return userRepository.findById(id);
-    }
+    public UserProfileDTO updateProfile(String username, UpdateProfileDTO dto) {
 
-    public User create(User user) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Hash password
-        if (user.getPassword() != null) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
+        if (dto.displayName != null) user.setDisplayName(dto.displayName);
+        if (dto.email != null) user.setEmail(dto.email);
+        if (dto.avatarUrl != null) user.setAvatarUrl(dto.avatarUrl);
 
-        return userRepository.save(user);
-    }
+        userRepository.save(user);
 
-    public void delete(Long id) {
-        userRepository.deleteById(id);
-    }
-
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return new UserProfileDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getDisplayName(),
+                user.getRole(),
+                dto.avatarUrl
+        );
     }
 }
+
 
 
