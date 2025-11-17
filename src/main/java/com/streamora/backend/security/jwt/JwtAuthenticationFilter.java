@@ -47,9 +47,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         );
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
+
+                // ➤ IMPORTANTE: agregar username para los controladores
+                request.setAttribute("username", username);
             }
         }
 
         filterChain.doFilter(request, response);
     }
 }
+
