@@ -1,33 +1,25 @@
 package com.streamora.backend.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/{email}")
-    public ResponseEntity<User> getUser(@PathVariable String email) {
-        return ResponseEntity.ok(userService.getUser(email));
+    @GetMapping("/test")
+    public String test() {
+        return "User module working!";
     }
 
-    @PutMapping("/{email}/email")
-    public ResponseEntity<User> updateEmail(
-            @PathVariable String email,
-            @RequestParam String newEmail) {
-        return ResponseEntity.ok(userService.updateEmail(email, newEmail));
-    }
-
-    @PutMapping("/{email}/avatar")
-    public ResponseEntity<User> updateAvatar(
-            @PathVariable String email,
-            @RequestParam String url) {
-        return ResponseEntity.ok(userService.updateAvatar(email, url));
+    // 🔥 NEW: List all users (important for knowing IDs)
+    @GetMapping
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
     }
 }
-

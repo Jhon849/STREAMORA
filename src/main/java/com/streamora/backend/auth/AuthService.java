@@ -1,8 +1,9 @@
 package com.streamora.backend.auth;
 
-import com.streamora.backend.security.jwt.JwtProvider;
+import com.streamora.backend.security.JwtService;
 import com.streamora.backend.user.User;
-import com.streamora.backend.user.UserRepository;
+import com.streamora.backend.user.UserRole;
+import com.streamora.backend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,39 +12,44 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepo;
-    private final PasswordEncoder encoder;
-    private final JwtProvider jwtProvider;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public String register(RegisterRequest request) {
+    public AuthResponse register(RegisterRequest request) {
 
-        if (userRepo.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("El email ya está registrado");
+        if (userService.emailExists(request.getEmail())) {
+            throw new RuntimeException("Email already exists");
         }
 
-        User user = User.builder()
-                .email(request.getEmail())
-                .password(encoder.encode(request.getPassword()))
-                .avatarUrl(null)
-                .build();
+        if (userService.usernameExists(request.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
 
-        userRepo.save(user);
+        String encryptedPassword = passwordEncoder.encode(request.getPassword());
 
-        return jwtProvider.generateToken(user.getUsername());
+        User user = userService.createUser(
+                request.getUsername(),
+                request.getEmail(),
+                encryptedPassword,
+                UserRole.USER
+        );
+
+        String token = jwtService.generateToken(user.getEmail());
+
+        return new AuthResponse(token);
     }
 
-    public String login(String email, String password) {
+    public AuthResponse login(LoginRequest request) {
 
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
+        User user = userService.getByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
-        if (!encoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Credenciales inválidas");
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
         }
 
-        return jwtProvider.generateToken(user.getUsername());
+        String token = jwtService.generateToken(user.getEmail());
+        return new AuthResponse(token);
     }
 }
-
-
-

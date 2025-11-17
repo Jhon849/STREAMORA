@@ -2,11 +2,13 @@ package com.streamora.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-public class StreamoraApplication {
+@ComponentScan(basePackages = "com.streamora.backend")
+public class BackendApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(StreamoraApplication.class, args);
+        SpringApplication.run(BackendApplication.class, args);
     }
 }
-
