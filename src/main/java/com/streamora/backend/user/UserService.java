@@ -2,13 +2,14 @@ package com.streamora.backend.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements org.springframework.security.core.userdetails.UserDetailsService {
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
@@ -16,29 +17,25 @@ public class UserService implements org.springframework.security.core.userdetail
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
-    }
-
-    public User createUser(User user) {
-        user.setPassword(encoder.encode(user.getPassword()));
-        return userRepository.save(user);
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
     }
 
     public User getUser(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
     }
 
     public User updateEmail(String oldEmail, String newEmail) {
-        User u = getUser(oldEmail);
-        u.setEmail(newEmail);
-        return userRepository.save(u);
+        User user = getUser(oldEmail);
+        user.setEmail(newEmail);
+        return userRepository.save(user);
     }
 
     public User updateAvatar(String email, String avatarUrl) {
-        User u = getUser(email);
-        u.setAvatarUrl(avatarUrl);
-        return userRepository.save(u);
+        User user = getUser(email);
+        user.setAvatarUrl(avatarUrl);
+        return userRepository.save(user);
     }
 }
+
 
