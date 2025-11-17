@@ -1,60 +1,46 @@
 package com.streamora.backend.auth;
 
-import com.streamora.backend.security.jwt.JwtProvider;
 import com.streamora.backend.user.User;
 import com.streamora.backend.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import com.streamora.backend.security.jwt.JwtProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
-    @Autowired
-    private UserRepository userRepo;
+    private final UserRepository userRepo;
+    private final PasswordEncoder encoder;
+    private final JwtProvider jwtProvider;
 
-    @Autowired
-    private PasswordEncoder encoder;
+    public String register(RegisterRequest request) {
 
-    @Autowired
-    private AuthenticationManager authManager;
+        if (userRepo.existsByEmail(request.getEmail()))
+            throw new RuntimeException("Email already exists");
 
-    @Autowired
-    private JwtProvider jwtProvider;
-
-    public AuthResponse register(RegisterRequest req) {
-
-        if (userRepo.existsByUsername(req.username)) {
-            throw new RuntimeException("Username already taken");
-        }
-
-        if (userRepo.existsByEmail(req.email)) {
-            throw new RuntimeException("Email already registered");
-        }
-
-        User user = new User();
-        user.setUsername(req.username);
-        user.setEmail(req.email);
-        user.setPassword(encoder.encode(req.password));
-        user.setRole("USER");
+        User user = User.builder()
+                .email(request.getEmail())
+                .password(encoder.encode(request.getPassword()))
+                .avatarUrl(request.getAvatarUrl())
+                .build();
 
         userRepo.save(user);
 
-        String token = jwtProvider.generateToken(user.getUsername());
-
-        return new AuthResponse("User registered successfully", token);
+        return jwtProvider.generateToken(user.getEmail());
     }
 
-    public AuthResponse login(LoginRequest req) {
+    public String login(LoginRequest request) {
 
-        authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.username, req.password)
-        );
+        User user = userRepo.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String token = jwtProvider.generateToken(req.username);
+        if (!encoder.matches(request.getPassword(), user.getPassword()))
+            throw new RuntimeException("Invalid password");
 
-        return new AuthResponse("Login successful", token);
+        return jwtProvider.generateToken(user.getEmail());
     }
 }
+
+

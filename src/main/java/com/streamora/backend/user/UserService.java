@@ -1,50 +1,44 @@
 package com.streamora.backend.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserService implements UserDetailsService {
+@RequiredArgsConstructor
+public class UserService implements org.springframework.security.core.userdetails.UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepo;
-
-    @Autowired
-    private PasswordEncoder encoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder encoder;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-        User user = userRepo.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .roles(user.getRole())
-                .build();
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 
-    public User getUser(String username) {
-        return userRepo.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public User createUser(User user) {
+        user.setPassword(encoder.encode(user.getPassword()));
+        return userRepository.save(user);
     }
 
-    public User updateAvatar(String username, String url) {
-
-        User user = getUser(username);
-        user.setAvatarUrl(url);
-        return userRepo.save(user);
+    public User getUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 
-    public User updateEmail(String username, String newEmail) {
-        User user = getUser(username);
-        user.setEmail(newEmail);
-        return userRepo.save(user);
+    public User updateEmail(String oldEmail, String newEmail) {
+        User u = getUser(oldEmail);
+        u.setEmail(newEmail);
+        return userRepository.save(u);
     }
 
+    public User updateAvatar(String email, String avatarUrl) {
+        User u = getUser(email);
+        u.setAvatarUrl(avatarUrl);
+        return userRepository.save(u);
+    }
 }
+

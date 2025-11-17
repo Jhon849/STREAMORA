@@ -1,47 +1,33 @@
 package com.streamora.backend.user;
 
-import com.streamora.backend.user.dto.UpdateProfileDTO;
-import com.streamora.backend.user.dto.UserProfileDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @GetMapping("/me")
-    public UserProfileDTO getMyInfo(@RequestAttribute("username") String username) {
-
-        User u = userService.getUser(username);
-
-        return new UserProfileDTO(
-                u.getUsername(),
-                u.getEmail(),
-                u.getAvatarUrl()
-        );
+    @GetMapping("/{email}")
+    public ResponseEntity<User> getUser(@PathVariable String email) {
+        return ResponseEntity.ok(userService.getUser(email));
     }
 
-    @PutMapping("/me")
-    public UserProfileDTO updateMyInfo(@RequestAttribute("username") String username,
-                                       @RequestBody UpdateProfileDTO dto) {
+    @PutMapping("/{email}/email")
+    public ResponseEntity<User> updateEmail(
+            @PathVariable String email,
+            @RequestParam String newEmail) {
+        return ResponseEntity.ok(userService.updateEmail(email, newEmail));
+    }
 
-        if (dto.email != null) {
-            userService.updateEmail(username, dto.email);
-        }
-
-        if (dto.avatarUrl != null) {
-            userService.updateAvatar(username, dto.avatarUrl);
-        }
-
-        User u = userService.getUser(username);
-
-        return new UserProfileDTO(
-                u.getUsername(),
-                u.getEmail(),
-                u.getAvatarUrl()
-        );
+    @PutMapping("/{email}/avatar")
+    public ResponseEntity<User> updateAvatar(
+            @PathVariable String email,
+            @RequestParam String url) {
+        return ResponseEntity.ok(userService.updateAvatar(email, url));
     }
 }
+

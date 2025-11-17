@@ -1,24 +1,27 @@
 package com.streamora.backend.auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody RegisterRequest req) {
-        return authService.register(req);
+    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+        String token = authService.register(request);
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest req) {
-        return authService.login(req);
+    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+        String token = authService.login(request);
+        return ResponseEntity.ok(token);
     }
-
 }
+
 

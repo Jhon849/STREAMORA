@@ -1,6 +1,11 @@
 package com.streamora.backend.auth;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 public class LoginRequest {
-    public String username;
-    public String password;
+    private String email;
+    private String password;
 }
+

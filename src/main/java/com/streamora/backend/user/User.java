@@ -1,45 +1,66 @@
 package com.streamora.backend.user;
 
 import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.Collections;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
-    private String username;
-
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
     private String password;
-
-    private String role = "USER";
 
     private String avatarUrl;
 
-    public User() {}
+    // --------------------------
+    // USERDETAILS IMPLEMENTATION
+    // --------------------------
 
-    // Getters & Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.emptyList(); // sin roles por ahora
+    }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    @Override
+    public String getUsername() {
+        return this.email; // usamos email como username
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
-    public String getAvatarUrl() { return avatarUrl; }
-    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
+
