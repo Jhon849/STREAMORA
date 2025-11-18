@@ -1,6 +1,8 @@
 package com.streamora.backend.user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,7 +31,16 @@ public class UserController {
         return userService.getUser(id);
     }
 
-    // ⭐ SUBIR AVATAR
+    @GetMapping("/me")
+    public ResponseEntity<?> getMyData(Authentication authentication) {
+        String email = authentication.getName();
+
+        User user = userService.getByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return ResponseEntity.ok(user);
+    }
+
     @PostMapping("/{id}/avatar")
     public User uploadAvatar(
             @PathVariable Long id,
@@ -38,7 +49,6 @@ public class UserController {
         return userService.uploadAvatar(id, file);
     }
 
-    // ⭐ SUBIR BANNER
     @PostMapping("/{id}/banner")
     public User uploadBanner(
             @PathVariable Long id,
@@ -47,3 +57,4 @@ public class UserController {
         return userService.uploadBanner(id, file);
     }
 }
+

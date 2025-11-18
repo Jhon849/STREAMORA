@@ -25,12 +25,15 @@ public class User {
 
     @JsonIgnore
     @Column(nullable = false)
-    private String password; // Encrypted password (hidden in JSON)
+    private String password; 
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
     private String avatarUrl;
+
+    // 🔥 NUEVO: Banner del perfil
+    private String bannerUrl;
 
     private LocalDateTime createdAt;
 }
