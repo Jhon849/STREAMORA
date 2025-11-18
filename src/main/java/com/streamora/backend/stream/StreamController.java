@@ -1,5 +1,6 @@
 package com.streamora.backend.stream;
 
+import com.streamora.backend.stream.dto.StartStreamRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,20 +14,28 @@ public class StreamController {
     private final StreamService streamService;
 
     @PostMapping("/start")
-    public Stream start(@RequestParam Long userId, @RequestParam String title) {
-        return streamService.startStream(userId, title);
+    public Stream startStream(
+            @RequestParam Long userId,
+            @RequestBody StartStreamRequest request
+    ) {
+        return streamService.startStream(
+                userId,
+                request.getTitle(),
+                request.getDescription()
+        );
     }
 
     @PostMapping("/stop")
-    public Stream stop(@RequestParam Long userId) {
+    public Stream stopStream(@RequestParam Long userId) {
         return streamService.stopStream(userId);
     }
 
     @GetMapping("/active")
-    public List<Stream> activeStreams() {
+    public List<Stream> getActiveStreams() {
         return streamService.getActiveStreams();
     }
 }
+
 
 
 

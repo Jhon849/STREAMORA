@@ -1,10 +1,10 @@
 package com.streamora.backend.stream.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class CreateStreamRequest {
+@Getter @Setter
+public class StartStreamRequest {
     private String title;
     private String description;
-    private String category;
 }

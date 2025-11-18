@@ -11,6 +11,11 @@ public interface StreamRepository extends JpaRepository<Stream, Long> {
 
     Optional<Stream> findByStreamKey(String streamKey);
 
-    List<Stream> findByIsLiveTrue();
+    // replaced the old boolean method
+    List<Stream> findByStatus(StreamStatus status);
+
+    // useful helper: check if user has an active stream
+    Optional<Stream> findByUserIdAndStatus(Long userId, StreamStatus status);
 }
+
 
