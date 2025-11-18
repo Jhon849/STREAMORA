@@ -3,14 +3,14 @@ package com.streamora.backend.stream;
 import com.streamora.backend.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "streams")
-@Data
-@Builder
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Stream {
 
     @Id
@@ -19,19 +19,13 @@ public class Stream {
 
     private String title;
 
-    private String description;
+    private String streamKey;
 
-    private String category;
+    private boolean isLive;
 
-    private String thumbnailUrl;
+    private LocalDateTime startedAt;
 
-    private String streamKey; // Unique key for OBS / RTMP
-
-    private boolean live;
-
-    private LocalDateTime createdAt;
-
-    @OneToOne
-    @JoinColumn(name = "user_id", unique = true)
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 }
