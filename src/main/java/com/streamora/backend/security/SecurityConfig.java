@@ -30,30 +30,33 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .cors().and()
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // 🔓 RUTAS PÚBLICAS
+                        // Rutas públicas (SIN TOKEN)
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/streams/**").permitAll()
                         .requestMatchers("/api/categories/**").permitAll()
+                        .requestMatchers("/api/streams/**").permitAll()
                         .requestMatchers("/api/cloud/**").permitAll()
 
-                        // 🔒 RUTAS PRIVADAS
+                        // Rutas protegidas
                         .requestMatchers("/api/users/**").authenticated()
 
-                        // 🔒 CUALQUIER OTRA COSA
-                        .anyRequest().authenticated()
+                        // El resto no requiere token
+                        .anyRequest().permitAll()
                 )
-                .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+                // 🔥 MUY IMPORTANTE
+                // el filtro se añade DESPUÉS de definir rutas públicas
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
+                .authenticationProvider(authenticationProvider());
 
         return http.build();
     }
 
-    // 🌐 CORS COMPLETO PARA RENDER + VERCEL
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -71,13 +74,7 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-
         return source;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -89,10 +86,18 @@ public class SecurityConfig {
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }
+
+
+
 
 
 

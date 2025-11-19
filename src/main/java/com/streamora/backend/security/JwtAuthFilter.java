@@ -22,58 +22,60 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final com.streamora.backend.user.UserDetailsServiceImpl userDetailsService;
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-        String path = request.getServletPath();
-
-        // 🔥 RUTAS PÚBLICAS QUE NO DEBEN PASAR POR JWT
-        if (path.startsWith("/api/auth")
-                || path.startsWith("/api/streams")
-                || path.startsWith("/api/categories")
-                || path.startsWith("/api/cloud")) {
-
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // 🔹 TOKEN EN HEADERS
         final String authHeader = request.getHeader("Authorization");
 
-        // 🚫 NO HAY TOKEN → CONTINUAR SIN AUTENTICAR
+        // ⛔ Si no hay token → permitir que la petición continúe SIN autenticar
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // ✔ PROCESAR JWT
+        // Extraer token
         String token = authHeader.substring(7);
-        String email = jwtService.extractEmail(token);
 
+        // Intentar obtener email dentro del token
+        String email;
+        try {
+            email = jwtService.extractEmail(token);
+        } catch (Exception e) {
+            // Token inválido → dejar pasar sin autenticar (no 403)
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Si hay email y no hay autenticación previa en el contexto
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
+            // Validar token
+            if (jwtService.isTokenValid(token, userDetails)) {
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
 
-            authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
 
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+                // Registrar usuario autenticado
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
         }
 
         filterChain.doFilter(request, response);
     }
 }
+
+
 
 
 
