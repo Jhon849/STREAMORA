@@ -50,22 +50,24 @@ public class SecurityConfig {
     // ✅ Configuración completa de CORS (necesario para Render + Frontend)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
+    CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
-                "https://streamora.space",       // Tu frontend en producción
-                "http://localhost:5173",         // Frontend local
-                "http://localhost:3000"
-        ));
+    config.setAllowedOrigins(List.of(
+            "https://streamora-space.vercel.app",  // FRONTEND REAL
+            "https://streamora.space",             // dominio alterno si lo usas
+            "http://localhost:5173",
+            "http://localhost:3000"
+    ));
 
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+    config.setAllowedHeaders(List.of("*"));
+    config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return source;
+}
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
