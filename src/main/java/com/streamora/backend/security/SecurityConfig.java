@@ -30,16 +30,21 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .cors()   // ✅ Habilita CORS en Spring Security
-                .and()
+                .cors().and()
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
+                        // 🔓 RUTAS PÚBLICAS
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/streams/**").permitAll()
-                        .requestMatchers("/api/cloud/**").permitAll()
-                        .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/categories/**").permitAll()
+                        .requestMatchers("/api/cloud/**").permitAll()
+
+                        // 🔒 RUTAS PRIVADAS
+                        .requestMatchers("/api/users/**").authenticated()
+
+                        // 🔒 CUALQUIER OTRA COSA
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
@@ -48,27 +53,27 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ Configuración completa de CORS (necesario para Render + Frontend)
+    // 🌐 CORS COMPLETO PARA RENDER + VERCEL
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration config = new CorsConfiguration();
+        CorsConfiguration config = new CorsConfiguration();
 
-    config.setAllowedOrigins(List.of(
-            "https://streamora-space.vercel.app",  // FRONTEND REAL
-            "https://streamora.space",             // dominio alterno si lo usas
-            "http://localhost:5173",
-            "http://localhost:3000"
-    ));
+        config.setAllowedOrigins(List.of(
+                "https://streamora-space.vercel.app",
+                "https://streamora.space",
+                "http://localhost:5173",
+                "http://localhost:3000"
+        ));
 
-    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-    config.setAllowedHeaders(List.of("*"));
-    config.setAllowCredentials(true);
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config);
-    return source;
-}
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
 
+        return source;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -88,6 +93,7 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 }
+
 
 
 

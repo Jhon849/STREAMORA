@@ -22,54 +22,60 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final com.streamora.backend.user.UserDetailsServiceImpl userDetailsService;
 
     @Override
-protected void doFilterInternal(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        FilterChain filterChain
-) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
-    String path = request.getServletPath();
+        String path = request.getServletPath();
 
-    // ⛔ IGNORAR JWT PARA RUTAS PÚBLICAS
-    if (path.startsWith("/api/auth")
-            || path.startsWith("/api/streams")
-            || path.startsWith("/api/categories")
-            || path.startsWith("/api/cloud")) {
+        // 🔥 RUTAS PÚBLICAS QUE NO DEBEN PASAR POR JWT
+        if (path.startsWith("/api/auth")
+                || path.startsWith("/api/streams")
+                || path.startsWith("/api/categories")
+                || path.startsWith("/api/cloud")) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // 🔹 TOKEN EN HEADERS
+        final String authHeader = request.getHeader("Authorization");
+
+        // 🚫 NO HAY TOKEN → CONTINUAR SIN AUTENTICAR
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // ✔ PROCESAR JWT
+        String token = authHeader.substring(7);
+        String email = jwtService.extractEmail(token);
+
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+            authToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+        }
 
         filterChain.doFilter(request, response);
-        return;
     }
-
-    // ⛔ SI NO HAY TOKEN -> CONTINUAR SIN AUTENTICAR
-    final String authHeader = request.getHeader("Authorization");
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-        filterChain.doFilter(request, response);
-        return;
-    }
-
-    // ✔ PROCESAR JWT SOLAMENTE PARA RUTAS PROTEGIDAS
-    String token = authHeader.substring(7);
-    String email = jwtService.extractEmail(token);
-
-    if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-
-        authToken.setDetails(
-                new WebAuthenticationDetailsSource().buildDetails(request)
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-    }
-
-    filterChain.doFilter(request, response);
 }
+
+
 
 
 
