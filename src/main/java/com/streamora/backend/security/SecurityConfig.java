@@ -30,21 +30,30 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/categories/**").permitAll()
-                        .requestMatchers("/api/streams/**").permitAll()
+                // 🔓 Permitir login/registro
+                .requestMatchers("/api/auth/register").permitAll()
+                .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/test").permitAll()
 
-                        .requestMatchers("/api/users/**").authenticated()
+                // 🔒 /api/auth/me requiere token
+                .requestMatchers("/api/auth/me").authenticated()
 
-                        .anyRequest().permitAll()
-                )
-                .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                // 🔓 Categorías y streams públicos
+                .requestMatchers("/api/categories/**").permitAll()
+                .requestMatchers("/api/streams/**").permitAll()
+
+                // 🔒 Rutas privadas
+                .requestMatchers("/api/users/**").authenticated()
+
+                .anyRequest().permitAll()
+            )
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
