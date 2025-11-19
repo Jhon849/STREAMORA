@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/streams/**").permitAll()
                         .requestMatchers("/api/cloud/**").permitAll()
                         .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/categories/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
