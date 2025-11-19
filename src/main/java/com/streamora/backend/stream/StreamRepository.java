@@ -6,14 +6,19 @@ import java.util.Optional;
 
 public interface StreamRepository extends JpaRepository<Stream, Long> {
 
+    // Encuentra stream por usuario
     Optional<Stream> findByUserId(Long userId);
 
+    // Encuentra stream por streamKey
     Optional<Stream> findByStreamKey(String streamKey);
 
-    List<Stream> findByStatus(StreamStatus status);
+    // Devuelve todos los streams que estén en vivo
+    List<Stream> findByLiveTrue();
 
-    Optional<Stream> findByUserIdAndStatus(Long userId, StreamStatus status);
+    // Encuentra el stream activo de un usuario
+    Optional<Stream> findByUserIdAndLiveTrue(Long userId);
 }
+
 
 
 
