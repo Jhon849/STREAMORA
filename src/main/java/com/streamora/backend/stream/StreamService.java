@@ -20,24 +20,23 @@ public class StreamService {
 
         User user = userService.getUser(userId);
 
-        // Check if user already has an active stream
-        Stream activeStream = streamRepository
+        // Buscar si ya está online
+        Stream active = streamRepository
                 .findByUserIdAndStatus(userId, StreamStatus.ONLINE)
                 .orElse(null);
 
-        if (activeStream != null) {
-            // If already streaming, update title/description
-            activeStream.setTitle(title);
-            activeStream.setDescription(description);
-            return streamRepository.save(activeStream);
+        // Si ya estaba online, actualiza título y descripción
+        if (active != null) {
+            active.setTitle(title);
+            active.setDescription(description);
+            return streamRepository.save(active);
         }
 
-        String streamKey = UUID.randomUUID().toString();
-
+        // Crear stream nuevo
         Stream stream = Stream.builder()
                 .title(title)
                 .description(description)
-                .streamKey(streamKey)
+                .streamKey(UUID.randomUUID().toString())
                 .status(StreamStatus.ONLINE)
                 .startedAt(LocalDateTime.now())
                 .user(user)
@@ -62,6 +61,7 @@ public class StreamService {
         return streamRepository.findByStatus(StreamStatus.ONLINE);
     }
 }
+
 
 
 

@@ -7,10 +7,12 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "streams")
 public class Stream {
 
     @Id
@@ -19,20 +21,24 @@ public class Stream {
 
     private String title;
 
-    private String description; // added for stream info
+    private String description;
 
+    @Column(name = "stream_key")
     private String streamKey;
 
-    // replaced boolean with enum for more clarity
     @Enumerated(EnumType.STRING)
-    private StreamStatus status = StreamStatus.OFFLINE;
+    private StreamStatus status;   // ONLINE / OFFLINE
 
+    @Column(name = "started_at")
     private LocalDateTime startedAt;
 
-    private LocalDateTime endedAt; // added for tracking stream duration
+    @Column(name = "ended_at")
+    private LocalDateTime endedAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 }
+
+
 
