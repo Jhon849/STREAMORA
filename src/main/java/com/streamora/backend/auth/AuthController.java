@@ -22,6 +22,8 @@ public class AuthController {
 
     @GetMapping("/test")
     public String test() {
-        return "Auth module working!";
+        return "Auth working!";
     }
 }
+
+

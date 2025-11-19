@@ -35,24 +35,16 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // Rutas públicas (SIN TOKEN)
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/categories/**").permitAll()
                         .requestMatchers("/api/streams/**").permitAll()
-                        .requestMatchers("/api/cloud/**").permitAll()
 
-                        // Rutas protegidas
                         .requestMatchers("/api/users/**").authenticated()
 
-                        // El resto no requiere token
                         .anyRequest().permitAll()
                 )
-
-                // 🔥 MUY IMPORTANTE
-                // el filtro se añade DESPUÉS de definir rutas públicas
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
-                .authenticationProvider(authenticationProvider());
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -64,8 +56,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "https://streamora-space.vercel.app",
                 "https://streamora.space",
-                "http://localhost:5173",
-                "http://localhost:3000"
+                "http://localhost:5173"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -95,6 +86,7 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 }
+
 
 
 
