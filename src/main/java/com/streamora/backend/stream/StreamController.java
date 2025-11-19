@@ -13,6 +13,9 @@ public class StreamController {
 
     private final StreamService streamService;
 
+    /**
+     * Iniciar un stream.
+     */
     @PostMapping("/start")
     public Stream startStream(
             @RequestParam Long userId,
@@ -25,16 +28,33 @@ public class StreamController {
         );
     }
 
+    /**
+     * Detener un stream.
+     */
     @PostMapping("/stop")
     public Stream stopStream(@RequestParam Long userId) {
         return streamService.stopStream(userId);
     }
 
+    /**
+     * 🔥 IMPORTANTE → Este endpoint lo usa tu frontend:
+     * GET /api/streams/live
+     */
+    @GetMapping("/live")
+    public List<Stream> getLiveStreams() {
+        return streamService.getActiveStreams();
+    }
+
+    /**
+     * Endpoint opcional, mantenido por compatibilidad:
+     * GET /api/streams/active
+     */
     @GetMapping("/active")
     public List<Stream> getActiveStreams() {
         return streamService.getActiveStreams();
     }
 }
+
 
 
 
