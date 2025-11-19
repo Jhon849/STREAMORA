@@ -17,6 +17,9 @@ public class JwtService {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
+    // ======================================
+    // GENERAR TOKEN
+    // ======================================
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -26,12 +29,43 @@ public class JwtService {
                 .compact();
     }
 
+    // ======================================
+    // EXTRAER EMAIL DEL TOKEN
+    // ======================================
     public String extractEmail(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    // ======================================
+    // VALIDAR TOKEN (USADO POR JwtAuthFilter)
+    // ======================================
+    public boolean isTokenValid(String token, org.springframework.security.core.userdetails.UserDetails userDetails) {
+
+        final String email = extractEmail(token);
+
+        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    // ======================================
+    // VER SI EL TOKEN ESTÁ EXPIRADO
+    // ======================================
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return extractAllClaims(token).getExpiration();
+    }
+
+    // ======================================
+    // OBTENER CLAIMS
+    // ======================================
+    private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+                .getBody();
     }
 }
+
