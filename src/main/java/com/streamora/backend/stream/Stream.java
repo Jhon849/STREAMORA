@@ -27,7 +27,7 @@ public class Stream {
     private String streamKey;
 
     @Column(name = "viewer_count")
-    private int viewerCount = 0;
+private int viewerCount = 0;
 
 
     private boolean live;
