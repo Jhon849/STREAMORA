@@ -18,7 +18,7 @@ public class UserService {
     private final CloudinaryService cloudinaryService;
 
     // =======================================================
-    //  USER CREATION VALIDATIONS
+    //  VALIDACIONES
     // =======================================================
 
     public boolean emailExists(String email) {
@@ -30,7 +30,7 @@ public class UserService {
     }
 
     // =======================================================
-    //  CREATE USER
+    //  CREAR USUARIO (siempre con createdAt)
     // =======================================================
 
     public User createUser(String username, String email, String encryptedPassword, UserRole role) {
@@ -40,7 +40,7 @@ public class UserService {
                 .email(email)
                 .password(encryptedPassword)
                 .role(role)
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now()) // <-- siempre creado
                 .build();
 
         return userRepository.save(user);
@@ -51,40 +51,49 @@ public class UserService {
     // =======================================================
 
     public Optional<User> getByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmail(email)
+                .map(this::fixCreatedAtSafely);
     }
 
     // =======================================================
-    //  GET ALL USERS
-    // =======================================================
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    // =======================================================
-    //  GET USER BY ID  (fixed createdAt null issue)
+    //  OBTENER USUARIO POR ID  (ARREGLA createdAt)
     // =======================================================
 
     public User getUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 🔥 FIX: Ensure createdAt is never null
+        return fixCreatedAtSafely(user);
+    }
+
+    // =======================================================
+    //  OBTENER TODOS LOS USUARIOS (ARREGLA createdAt)
+    // =======================================================
+
+    public List<User> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        users.forEach(this::fixCreatedAtSafely);
+        return users;
+    }
+
+    // =======================================================
+    //  MÉTODO UNIVERSAL PARA ARREGLAR createdAt == null
+    // =======================================================
+
+    private User fixCreatedAtSafely(User user) {
         if (user.getCreatedAt() == null) {
             user.setCreatedAt(LocalDateTime.now());
             userRepository.save(user);
         }
-
         return user;
     }
 
     // =======================================================
-    //  UPLOAD AVATAR
+    //  SUBIR AVATAR
     // =======================================================
 
     public User uploadAvatar(Long id, MultipartFile file) throws IOException {
-        User user = getUser(id);
+        User user = getUser(id); // <-- ya pasa por el fix
 
         String url = cloudinaryService.upload(file);
         user.setAvatarUrl(url);
@@ -93,11 +102,11 @@ public class UserService {
     }
 
     // =======================================================
-    //  UPLOAD BANNER
+    //  SUBIR BANNER
     // =======================================================
 
     public User uploadBanner(Long id, MultipartFile file) throws IOException {
-        User user = getUser(id);
+        User user = getUser(id); // <-- ya pasa por el fix
 
         String url = cloudinaryService.upload(file);
         user.setBannerUrl(url);

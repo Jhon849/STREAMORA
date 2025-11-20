@@ -1,5 +1,6 @@
 package com.streamora.backend.stream;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.streamora.backend.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,14 +21,11 @@ public class Stream {
     private Long id;
 
     private String title;
-
     private String description;
 
     @Column(name = "stream_key")
     private String streamKey;
 
-    // ESTE CAMPO ES EL QUE SPRING NO ENCONTRABA
-    @Column(name = "live")
     private boolean live;
 
     @Column(name = "thumbnail_url")
@@ -35,6 +33,7 @@ public class Stream {
 
     private String category;
 
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -42,6 +41,7 @@ public class Stream {
     @JoinColumn(name = "user_id")
     private User user;
 }
+
 
 
 

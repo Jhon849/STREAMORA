@@ -1,5 +1,6 @@
 package com.streamora.backend.user;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,24 +18,19 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
     private String email;
-
-    @Column(nullable = false, unique = true)
     private String username;
 
     @JsonIgnore
-    @Column(nullable = false)
-    private String password; 
+    private String password;
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
     private String avatarUrl;
-
-    // 🔥 NUEVO: Banner del perfil
     private String bannerUrl;
 
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 }
