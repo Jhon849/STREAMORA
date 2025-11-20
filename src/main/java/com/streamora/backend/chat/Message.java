@@ -3,25 +3,33 @@ package com.streamora.backend.chat;
 import com.streamora.backend.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
-@Builder
+@NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "chat_messages")
 public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long streamId;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User sender;
+
     private String content;
+
+    private String badge; // mod, sub, vip, founder
+
+    private String color; // color del usuario
 
     private LocalDateTime timestamp;
 
-    @ManyToOne
-    @JoinColumn(name = "sender_id")
-    private User sender;
-
-    private Long roomId;
+    private boolean moderated; // true si IA lo eliminó
 }
+

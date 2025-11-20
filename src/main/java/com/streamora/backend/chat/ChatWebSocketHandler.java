@@ -6,10 +6,14 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * Handles real-time chat communication between viewers and streamers.
  */
+
+ @Slf4j
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 

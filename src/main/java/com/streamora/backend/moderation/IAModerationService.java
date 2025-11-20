@@ -1,47 +1,33 @@
 package com.streamora.backend.moderation;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.json.JSONObject;
+
+import java.util.List;
 
 @Service
 public class IAModerationService {
 
-    @Value("${openai.api.key}")
-    private String apiKey;
+    private final List<String> forbiddenWords = List.of(
+            "puta", "puto", "gay", "negro", "marica",
+            "sexo", "porno", "violación",
+            "matar", "suicidio", "bomba",
+            "mierda", "pendejo", "idiota",
+            "http://", "https://"
+    );
 
-    private final RestTemplate rest = new RestTemplate();
+    public String checkMessage(String msg) {
+        if (msg.length() > 200) return "Mensaje demasiado largo";
+        if (msg.equals(msg.toUpperCase()) && msg.length() > 10)
+            return "Demasiadas mayúsculas";
 
-    public ModerationResult moderateText(String text) {
-
-        try {
-            String url = "https://api.openai.com/v1/moderations";
-
-            JSONObject body = new JSONObject();
-            body.put("model", "omni-moderation-latest");
-            body.put("input", text);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + apiKey);
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<String> request = new HttpEntity<>(body.toString(), headers);
-
-            ResponseEntity<String> response = rest.exchange(url, HttpMethod.POST, request, String.class);
-
-            JSONObject json = new JSONObject(response.getBody());
-            JSONObject result = json.getJSONArray("results").getJSONObject(0);
-
-            boolean flagged = result.getBoolean("flagged");
-            String categories = result.getJSONObject("categories").toString();
-
-            return new ModerationResult(flagged, categories);
-
-        } catch (Exception e) {
-            return new ModerationResult(false, "error");
+        for (String word : forbiddenWords) {
+            if (msg.toLowerCase().contains(word)) {
+                return "Palabra prohibida: " + word;
+            }
         }
+
+        return null; // mensaje aprobado
     }
 }
+
 

@@ -1,10 +1,12 @@
 package com.streamora.backend.moderation;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import java.time.LocalDateTime;
 
-@Data
 @Entity
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
 @Table(name = "moderation_logs")
 public class ModerationLog {
 
@@ -12,13 +14,12 @@ public class ModerationLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long streamId;
     private Long userId;
-    private Long roomId;
 
-    private String message;
-    private String result;   // allowed | blocked
-    private String category; // hate, sexual, violence ...
+    private String originalMessage;
+    private String reason;
 
-    private String createdAt = java.time.Instant.now().toString();
+    private LocalDateTime timestamp;
 }
 

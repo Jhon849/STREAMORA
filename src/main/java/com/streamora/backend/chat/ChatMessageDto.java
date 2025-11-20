@@ -8,3 +8,4 @@ public class ChatMessageDto {
     private Long roomId;
     private String content;
 }
+
