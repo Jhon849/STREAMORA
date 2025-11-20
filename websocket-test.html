@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Streamora WebSocket Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial; background: #111; color: #eee; padding: 20px; }
+        input, button { padding: 10px; font-size: 16px; margin: 5px 0; width: 100%; }
+        #log { background: #222; padding: 10px; height: 300px; overflow-y: scroll; }
+    </style>
+</head>
+<body>
+
+<h1>Streamora WebSocket Test</h1>
+
+<label>User ID:</label>
+<input id="userId" type="number" value="3"/>
+
+<label>Room ID:</label>
+<input id="roomId" type="number" value="1"/>
+
+<button onclick="connect()">Connect WebSocket</button>
+
+<div id="status">Status: <b style="color:red;">Disconnected</b></div>
+
+<h3>Messages</h3>
+<div id="log"></div>
+
+<h3>Send a Message</h3>
+<input id="textMessage" placeholder="Type a message..."/>
+<button onclick="sendMessage()">Send</button>
+
+<script>
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS("http://localhost:9001/ws");
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, frame => {
+            document.getElementById("status").innerHTML = 
+              'Status: <b style="color:lightgreen;">Connected ✔</b>';
+
+            const userId = document.getElementById("userId").value;
+            const roomId = document.getElementById("roomId").value;
+
+            // Subscribe to room messages
+            stompClient.subscribe(`/topic/room/${roomId}`, msg => {
+                log(`Public → ${msg.body}`);
+            });
+
+            // Subscribe to private moderation warnings
+            stompClient.subscribe(`/topic/room/${roomId}/user/${userId}`, msg => {
+                log(`⚠️ MODERATION → ${msg.body}`);
+            });
+
+            log("Connected to WebSocket!");
+        });
+    }
+
+    function sendMessage() {
+        const userId = document.getElementById("userId").value;
+        const roomId = document.getElementById("roomId").value;
+        const content = document.getElementById("textMessage").value;
+
+        stompClient.send("/app/send", {}, JSON.stringify({
+            userId: Number(userId),
+            roomId: Number(roomId),
+            content: content
+        }));
+
+        log(`Sent → ${content}`);
+        document.getElementById("textMessage").value = "";
+    }
+
+    function log(message) {
+        const logBox = document.getElementById("log");
+        logBox.innerHTML += message + "<br/>";
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+</script>
+
+</body>
+</html>

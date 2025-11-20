@@ -15,8 +15,9 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                            "https://streamora.space",     // tu frontend real
-                            "http://localhost:5173",       // para pruebas local
+                            "https://streamaora-space.vercel.app", // dominio REAL del frontend
+                            "https://streamora.space",             // si también funciona aquí
+                            "http://localhost:5173",
                             "http://localhost:3000"
                         )
                         .allowedMethods("*")

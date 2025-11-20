@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<h1>WebSocket Test</h1>
+<pre id="log"></pre>
+
+<script>
+    let socket = new SockJS("http://localhost:9001/ws");
+    let stomp = Stomp.over(socket);
+
+    stomp.connect({}, frame => {
+
+        document.getElementById("log").innerText += "Connected\n";
+
+        stomp.subscribe("/topic/room/1", msg => {
+            document.getElementById("log").innerText += "Public: " + msg.body + "\n";
+        });
+
+        stomp.subscribe("/topic/room/1/user/3", msg => {
+            document.getElementById("log").innerText += "PRIVATE: " + msg.body + "\n";
+        });
+
+        stomp.send("/app/send", {}, JSON.stringify({
+            userId: 3,
+            roomId: 1,
+            content: "Hello from HTML!"
+        }));
+    });
+</script>
+</body>
+</html>
