@@ -26,19 +26,23 @@ public class Stream {
     @Column(name = "stream_key")
     private String streamKey;
 
-    @Enumerated(EnumType.STRING)
-    private StreamStatus status;   // ONLINE / OFFLINE
+    // ESTE CAMPO ES EL QUE SPRING NO ENCONTRABA
+    @Column(name = "live")
+    private boolean live;
 
-    @Column(name = "started_at")
-    private LocalDateTime startedAt;
+    @Column(name = "thumbnail_url")
+    private String thumbnailUrl;
 
-    @Column(name = "ended_at")
-    private LocalDateTime endedAt;
+    private String category;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 }
+
 
 
 

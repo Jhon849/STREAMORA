@@ -16,51 +16,58 @@ public class StreamService {
     private final StreamRepository streamRepository;
     private final UserService userService;
 
+    // ========================
+    //   INICIAR STREAM
+    // ========================
     public Stream startStream(Long userId, String title, String description) {
 
         User user = userService.getUser(userId);
 
-        // Buscar si ya está online
-        Stream active = streamRepository
-                .findByUserIdAndStatus(userId, StreamStatus.ONLINE)
-                .orElse(null);
+        // Buscar si ya tiene un stream activo
+        Stream active = streamRepository.findByUserIdAndLiveTrue(userId).orElse(null);
 
-        // Si ya estaba online, actualiza título y descripción
         if (active != null) {
             active.setTitle(title);
             active.setDescription(description);
             return streamRepository.save(active);
         }
 
-        // Crear stream nuevo
+        // Crear nuevo stream
         Stream stream = Stream.builder()
                 .title(title)
                 .description(description)
                 .streamKey(UUID.randomUUID().toString())
-                .status(StreamStatus.ONLINE)
-                .startedAt(LocalDateTime.now())
+                .live(true)
+                .createdAt(LocalDateTime.now())
+                .thumbnailUrl("https://res.cloudinary.com/demo/image/upload/sample.jpg")
+                .category("GAMING")
                 .user(user)
                 .build();
 
         return streamRepository.save(stream);
     }
 
+    // ========================
+    //   DETENER STREAM
+    // ========================
     public Stream stopStream(Long userId) {
 
-        Stream stream = streamRepository
-                .findByUserIdAndStatus(userId, StreamStatus.ONLINE)
+        Stream stream = streamRepository.findByUserIdAndLiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("User is not currently live"));
 
-        stream.setStatus(StreamStatus.OFFLINE);
-        stream.setEndedAt(LocalDateTime.now());
+        stream.setLive(false);
 
         return streamRepository.save(stream);
     }
 
+    // ========================
+    //   OBTENER STREAMS EN VIVO
+    // ========================
     public List<Stream> getActiveStreams() {
-        return streamRepository.findByStatus(StreamStatus.ONLINE);
+        return streamRepository.findByLiveTrue();
     }
 }
+
 
 
 
