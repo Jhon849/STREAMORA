@@ -11,13 +11,13 @@ import java.util.List;
 @RequestMapping("/api/streams")
 @RequiredArgsConstructor
 public class StreamController {
-    
+
     private final SimpMessagingTemplate messagingTemplate;
     private final StreamService streamService;
 
     @PostMapping("/start")
     public Stream startStream(
-            @RequestParam String userId,   // <-- CAMBIO IMPORTANTE
+            @RequestParam String userId,
             @RequestBody StartStreamRequest request
     ) {
         return streamService.startStream(
@@ -28,7 +28,13 @@ public class StreamController {
     }
 
     @PostMapping("/stop")
-    public Stream stopStream(@RequestParam String userId) {  // <-- CAMBIO
+    public Stream stopStream(@RequestParam String userId) {
+        return streamService.stopStream(userId);
+    }
+
+    // 🔥 Alias para el frontend
+    @PostMapping("/end")
+    public Stream endStream(@RequestParam String userId) {
         return streamService.stopStream(userId);
     }
 
@@ -42,16 +48,16 @@ public class StreamController {
         return streamService.getActiveStreams();
     }
 
-    // ========================
-    //   VIEWER COUNTER REALTIME
-    // ========================
+    // 🔥 Obtener stream por ID (lo pide frontend)
+    @GetMapping("/{id}")
+    public Stream getStream(@PathVariable Long id) {
+        return streamService.getStreamById(id);
+    }
 
     @PostMapping("/{id}/view")
     public Stream addViewer(@PathVariable Long id) {
-
         Stream updated = streamService.addViewer(id);
 
-        // 🔥 Notificar en tiempo real por WebSocket
         messagingTemplate.convertAndSend(
                 "/topic/streams/" + id + "/viewers",
                 updated.getViewerCount()
@@ -62,10 +68,8 @@ public class StreamController {
 
     @PostMapping("/{id}/leave")
     public Stream removeViewer(@PathVariable Long id) {
-
         Stream updated = streamService.removeViewer(id);
 
-        // 🔥 Notificar en tiempo real por WebSocket
         messagingTemplate.convertAndSend(
                 "/topic/streams/" + id + "/viewers",
                 updated.getViewerCount()
@@ -74,6 +78,7 @@ public class StreamController {
         return updated;
     }
 }
+
 
 
 

@@ -16,9 +16,6 @@ public class StreamService {
     private final StreamRepository streamRepository;
     private final UserService userService;
 
-    // ========================
-    //   START STREAM
-    // ========================
     public Stream startStream(String userId, String title, String description) {
 
         User user = userService.getUser(userId);
@@ -27,7 +24,6 @@ public class StreamService {
             user.setCreatedAt(LocalDateTime.now());
         }
 
-        // Check if existing live stream
         Stream active = streamRepository.findByUserIdAndLiveTrue(userId).orElse(null);
 
         if (active != null) {
@@ -41,7 +37,6 @@ public class StreamService {
             return streamRepository.save(active);
         }
 
-        // New stream
         Stream stream = Stream.builder()
                 .title(title)
                 .description(description)
@@ -57,69 +52,50 @@ public class StreamService {
         return streamRepository.save(stream);
     }
 
-    // ========================
-    //   STOP STREAM
-    // ========================
     public Stream stopStream(String userId) {
-
         Stream stream = streamRepository.findByUserIdAndLiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("User is not currently live"));
 
         stream.setLive(false);
-        stream.setViewerCount(0); // reset viewers
+        stream.setViewerCount(0);
 
         return streamRepository.save(stream);
     }
 
-    // ========================
-    //   GET LIVE STREAMS
-    // ========================
     public List<Stream> getActiveStreams() {
         List<Stream> streams = streamRepository.findByLiveTrue();
 
-        for (Stream s : streams) {
-
-            if (s.getCreatedAt() == null) {
-                s.setCreatedAt(LocalDateTime.now());
-            }
-
-            if (s.getUser() != null && s.getUser().getCreatedAt() == null) {
+        streams.forEach(s -> {
+            if (s.getCreatedAt() == null) s.setCreatedAt(LocalDateTime.now());
+            if (s.getUser() != null && s.getUser().getCreatedAt()==null)
                 s.getUser().setCreatedAt(LocalDateTime.now());
-            }
-
-            if (s.getViewerCount() < 0) {
-                s.setViewerCount(0);
-            }
-        }
+            if (s.getViewerCount() < 0) s.setViewerCount(0);
+        });
 
         return streams;
     }
 
-    // ========================
-    //   ADD VIEWER
-    // ========================
     public Stream addViewer(Long streamId) {
         Stream stream = streamRepository.findById(streamId)
                 .orElseThrow(() -> new RuntimeException("Stream not found"));
-
         stream.setViewerCount(stream.getViewerCount() + 1);
-
         return streamRepository.save(stream);
     }
 
-    // ========================
-    //   REMOVE VIEWER
-    // ========================
     public Stream removeViewer(Long streamId) {
         Stream stream = streamRepository.findById(streamId)
                 .orElseThrow(() -> new RuntimeException("Stream not found"));
-
-        int newCount = Math.max(0, stream.getViewerCount() - 1);
-        stream.setViewerCount(newCount);
-
+        stream.setViewerCount(Math.max(0, stream.getViewerCount() - 1));
         return streamRepository.save(stream);
     }
+
+    // 🔥 Nuevo método necesario
+    public Stream getStreamById(Long id) {
+        return streamRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Stream not found"));
+    }
 }
+
 
 
 

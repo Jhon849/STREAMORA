@@ -1,5 +1,6 @@
 package com.streamora.backend.user;
 
+import com.streamora.backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,11 +16,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-
-    @GetMapping("/test")
-    public String test() {
-        return "User module ready!";
-    }
+    private final JwtService jwtService;
 
     @GetMapping
     public List<User> getAllUsers() {
@@ -39,6 +36,37 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    // 🔥 NUEVO: profile (lo usa el frontend)
+    @GetMapping("/profile")
+    public User getProfile(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        return userService.getByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    // 🔥 NUEVO: update (lo usa el frontend)
+    @PutMapping("/update")
+    public User updateProfile(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody User req
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtService.extractEmail(token);
+
+        User user = userService.getByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Solo actualiza lo que venga
+        if (req.getUsername() != null) user.setUsername(req.getUsername());
+        if (req.getBio() != null) user.setBio(req.getBio());
+        if (req.getAvatarUrl() != null) user.setAvatarUrl(req.getAvatarUrl());
+        if (req.getBannerUrl() != null) user.setBannerUrl(req.getBannerUrl());
+
+        return userService.saveUser(user);
+    }
+
     @PostMapping("/{id}/avatar")
     public User uploadAvatar(@PathVariable String id, @RequestParam("file") MultipartFile file) throws IOException {
         return userService.uploadAvatar(id, file);
@@ -53,6 +81,19 @@ public class UserController {
     public User updateBio(@PathVariable String id, @RequestBody String bio) {
         return userService.updateBio(id, bio);
     }
+
+    // 🔥 FRONTEND LO PIDE
+    @PostMapping("/{id}/follow")
+    public String follow(@PathVariable String id) {
+        return "Follow OK";
+    }
+
+    @PostMapping("/{id}/unfollow")
+    public String unfollow(@PathVariable String id) {
+        return "Unfollow OK";
+    }
 }
+
+
 
 

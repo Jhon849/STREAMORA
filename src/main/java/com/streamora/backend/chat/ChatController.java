@@ -15,7 +15,7 @@ public class ChatController {
     @PostMapping("/{streamId}/send")
     public void sendMessage(
             @PathVariable Long streamId,
-            @RequestParam String userId,   // <-- CAMBIO
+            @RequestParam String userId,
             @RequestParam String message
     ) {
         chatService.sendMessage(streamId, userId, message);
@@ -25,7 +25,14 @@ public class ChatController {
     public List<Message> getMessages(@PathVariable Long streamId) {
         return chatService.getMessages(streamId);
     }
+
+    // 🔥 Alias que el frontend espera
+    @GetMapping("/{streamId}/messages")
+    public List<Message> getMessagesAlias(@PathVariable Long streamId) {
+        return chatService.getMessages(streamId);
+    }
 }
+
 
 
 

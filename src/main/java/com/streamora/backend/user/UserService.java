@@ -119,7 +119,16 @@ public class UserService {
         user.setBio(bio);
         return userRepository.save(user);
     }
+
+    // ===========================
+    // NUEVO: guardar cambios del perfil
+    // ===========================
+
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
 }
+
   
 
 
