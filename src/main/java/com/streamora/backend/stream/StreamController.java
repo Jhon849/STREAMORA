@@ -1,5 +1,6 @@
 package com.streamora.backend.stream;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import com.streamora.backend.stream.dto.StartStreamRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +11,8 @@ import java.util.List;
 @RequestMapping("/api/streams")
 @RequiredArgsConstructor
 public class StreamController {
-
+    
+    private final SimpMessagingTemplate messagingTemplate;
     private final StreamService streamService;
 
     @PostMapping("/start")
@@ -39,7 +41,41 @@ public class StreamController {
     public List<Stream> getActiveStreams() {
         return streamService.getActiveStreams();
     }
+
+    // ========================
+    //   VIEWER COUNTER REALTIME
+    // ========================
+
+    @PostMapping("/{id}/view")
+    public Stream addViewer(@PathVariable Long id) {
+
+        Stream updated = streamService.addViewer(id);
+
+        // 🔥 Notificar en tiempo real por WebSocket
+        messagingTemplate.convertAndSend(
+                "/topic/streams/" + id + "/viewers",
+                updated.getViewerCount()
+        );
+
+        return updated;
+    }
+
+    @PostMapping("/{id}/leave")
+    public Stream removeViewer(@PathVariable Long id) {
+
+        Stream updated = streamService.removeViewer(id);
+
+        // 🔥 Notificar en tiempo real por WebSocket
+        messagingTemplate.convertAndSend(
+                "/topic/streams/" + id + "/viewers",
+                updated.getViewerCount()
+        );
+
+        return updated;
+    }
 }
+
+
 
 
 

@@ -23,12 +23,11 @@ public class StreamService {
 
         User user = userService.getUser(userId);
 
-        // If user.createdAt is null → fix it
         if (user.getCreatedAt() == null) {
             user.setCreatedAt(LocalDateTime.now());
         }
 
-        // Check if the user already has a live stream
+        // Check if existing live stream
         Stream active = streamRepository.findByUserIdAndLiveTrue(userId).orElse(null);
 
         if (active != null) {
@@ -42,13 +41,14 @@ public class StreamService {
             return streamRepository.save(active);
         }
 
-        // Create a new stream
+        // New stream
         Stream stream = Stream.builder()
                 .title(title)
                 .description(description)
                 .streamKey(UUID.randomUUID().toString())
                 .live(true)
                 .createdAt(LocalDateTime.now())
+                .viewerCount(0)
                 .thumbnailUrl("https://res.cloudinary.com/demo/image/upload/sample.jpg")
                 .category("GAMING")
                 .user(user)
@@ -66,6 +66,7 @@ public class StreamService {
                 .orElseThrow(() -> new RuntimeException("User is not currently live"));
 
         stream.setLive(false);
+        stream.setViewerCount(0); // reset viewers
 
         return streamRepository.save(stream);
     }
@@ -78,20 +79,48 @@ public class StreamService {
 
         for (Stream s : streams) {
 
-            // Fix stream createdAt null
             if (s.getCreatedAt() == null) {
                 s.setCreatedAt(LocalDateTime.now());
             }
 
-            // Fix user createdAt null
             if (s.getUser() != null && s.getUser().getCreatedAt() == null) {
                 s.getUser().setCreatedAt(LocalDateTime.now());
+            }
+
+            if (s.getViewerCount() < 0) {
+                s.setViewerCount(0);
             }
         }
 
         return streams;
     }
+
+    // ========================
+    //   ADD VIEWER
+    // ========================
+    public Stream addViewer(Long streamId) {
+        Stream stream = streamRepository.findById(streamId)
+                .orElseThrow(() -> new RuntimeException("Stream not found"));
+
+        stream.setViewerCount(stream.getViewerCount() + 1);
+
+        return streamRepository.save(stream);
+    }
+
+    // ========================
+    //   REMOVE VIEWER
+    // ========================
+    public Stream removeViewer(Long streamId) {
+        Stream stream = streamRepository.findById(streamId)
+                .orElseThrow(() -> new RuntimeException("Stream not found"));
+
+        int newCount = Math.max(0, stream.getViewerCount() - 1);
+        stream.setViewerCount(newCount);
+
+        return streamRepository.save(stream);
+    }
 }
+
 
 
 

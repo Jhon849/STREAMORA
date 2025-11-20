@@ -26,6 +26,10 @@ public class Stream {
     @Column(name = "stream_key")
     private String streamKey;
 
+    @Column(name = "viewer_count")
+    private int viewerCount = 0;
+
+
     private boolean live;
 
     @Column(name = "thumbnail_url")
