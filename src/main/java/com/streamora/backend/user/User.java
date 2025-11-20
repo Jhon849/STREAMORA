@@ -35,6 +35,18 @@ public class User {
     private UserRole role;
 
     private LocalDateTime createdAt;
+
+    // Email verificado o no
+    private boolean emailVerified = false;
+
+    // Verificación de email
+    private String verificationCode;
+    private LocalDateTime verificationExpiresAt;
+
+    // Recuperación de contraseña
+    private String resetToken;
+    private LocalDateTime resetTokenExpiresAt;
+
 }
 
 

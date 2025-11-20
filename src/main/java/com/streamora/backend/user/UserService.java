@@ -124,13 +124,30 @@ public class UserService {
     // NUEVO: guardar cambios del perfil
     // ===========================
 
+    // ===========================
+    // GUARDAR USER (lo usaremos mucho)
+    // ===========================
     public User saveUser(User user) {
         return userRepository.save(user);
     }
+
+   // ===========================
+   // BUSCAR POR RESET TOKEN
+   // ===========================
+    public Optional<User> getByResetToken(String token) {
+        return userRepository.findByResetToken(token)
+                .map(this::fixCreatedAtSafely);
+    }
+
+    // ===========================
+    // BUSCAR POR CÓDIGO DE VERIFICACIÓN
+    // ===========================
+public Optional<User> getByVerificationCode(String code) {
+    return userRepository.findByVerificationCode(code)
+            .map(this::fixCreatedAtSafely);
 }
 
-  
-
+}
 
 
 
