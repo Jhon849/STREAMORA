@@ -36,7 +36,7 @@ public class EmailService {
             Emails emails = resend.emails();
 
             CreateEmailOptions request = CreateEmailOptions.builder()
-                    .from("Streamora <onboarding@resend.dev>")
+                    .from("onboarding@resend.dev")
                     .to(to)
                     .subject(subject)
                     .html(html)
