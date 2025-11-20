@@ -17,7 +17,7 @@ public class StreamController {
 
     @PostMapping("/start")
     public Stream startStream(
-            @RequestParam Long userId,
+            @RequestParam String userId,   // <-- CAMBIO IMPORTANTE
             @RequestBody StartStreamRequest request
     ) {
         return streamService.startStream(
@@ -28,7 +28,7 @@ public class StreamController {
     }
 
     @PostMapping("/stop")
-    public Stream stopStream(@RequestParam Long userId) {
+    public Stream stopStream(@RequestParam String userId) {  // <-- CAMBIO
         return streamService.stopStream(userId);
     }
 
@@ -74,6 +74,7 @@ public class StreamController {
         return updated;
     }
 }
+
 
 
 

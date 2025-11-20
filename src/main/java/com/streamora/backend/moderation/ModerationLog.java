@@ -15,7 +15,8 @@ public class ModerationLog {
     private Long id;
 
     private Long streamId;
-    private Long userId;
+
+    private String userId; // ← FIX: antes era Long, ahora String
 
     private String originalMessage;
     private String reason;

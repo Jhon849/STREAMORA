@@ -1,42 +1,40 @@
 package com.streamora.backend.user;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
-@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
-    private String email;
+    @Column(nullable = false, unique = true)
     private String username;
 
-    @JsonIgnore
-    private String password;
+    @Column(nullable = false, unique = true)
+    private String email;
 
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private String password;
 
     private String avatarUrl;
     private String bannerUrl;
 
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private String bio;
+
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
+    private LocalDateTime createdAt;
 }
+
+

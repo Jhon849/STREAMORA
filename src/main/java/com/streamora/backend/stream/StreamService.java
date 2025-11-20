@@ -19,7 +19,7 @@ public class StreamService {
     // ========================
     //   START STREAM
     // ========================
-    public Stream startStream(Long userId, String title, String description) {
+    public Stream startStream(String userId, String title, String description) {
 
         User user = userService.getUser(userId);
 
@@ -60,7 +60,7 @@ public class StreamService {
     // ========================
     //   STOP STREAM
     // ========================
-    public Stream stopStream(Long userId) {
+    public Stream stopStream(String userId) {
 
         Stream stream = streamRepository.findByUserIdAndLiveTrue(userId)
                 .orElseThrow(() -> new RuntimeException("User is not currently live"));
@@ -120,6 +120,7 @@ public class StreamService {
         return streamRepository.save(stream);
     }
 }
+
 
 
 

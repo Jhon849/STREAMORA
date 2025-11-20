@@ -1,50 +1,68 @@
 package com.streamora.backend.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.function.Function;
 
 @Service
 public class JwtService {
 
-    private static final long EXPIRATION = 1000 * 60 * 60 * 24; // 24h
-    private static final String SECRET_KEY =
-            "123456789012345678901234567890123456789012345678901234567890abcd"; // 64 chars
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    @Value("${jwt.expiration}")
+    private long expirationMs;
+
+    private Key getSignKey() {
+        byte[] bytes = Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(bytes);
     }
 
-    public String generateToken(String email) {
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> resolver) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return resolver.apply(claims);
+    }
+
+    public String generateToken(String username) {
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String extractEmail(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+    public boolean isTokenValid(String token, String username) {
+        String extracted = extractUsername(token);
+        return extracted.equals(username) && !isTokenExpired(token);
     }
 
-    public boolean isTokenValid(String token, String email) {
-        try {
-            String extracted = extractEmail(token);
-            return extracted.equals(email);
-        } catch (Exception e) {
-            return false;
-        }
+    public String extractEmail(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    private boolean isTokenExpired(String token) {
+        Date exp = extractClaim(token, Claims::getExpiration);
+        return exp.before(new Date());
     }
 }
+
 
 
 

@@ -18,7 +18,7 @@ public class UserController {
 
     @GetMapping("/test")
     public String test() {
-        return "User module working!";
+        return "User module ready!";
     }
 
     @GetMapping
@@ -27,34 +27,32 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
+    public User getUser(@PathVariable String id) {
         return userService.getUser(id);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getMyData(Authentication authentication) {
-        String email = authentication.getName();
-
+    public ResponseEntity<?> getMyData(Authentication auth) {
+        String email = auth.getName();
         User user = userService.getByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         return ResponseEntity.ok(user);
     }
 
     @PostMapping("/{id}/avatar")
-    public User uploadAvatar(
-            @PathVariable Long id,
-            @RequestParam("file") MultipartFile file
-    ) throws IOException {
+    public User uploadAvatar(@PathVariable String id, @RequestParam("file") MultipartFile file) throws IOException {
         return userService.uploadAvatar(id, file);
     }
 
     @PostMapping("/{id}/banner")
-    public User uploadBanner(
-            @PathVariable Long id,
-            @RequestParam("file") MultipartFile file
-    ) throws IOException {
+    public User uploadBanner(@PathVariable String id, @RequestParam("file") MultipartFile file) throws IOException {
         return userService.uploadBanner(id, file);
     }
+
+    @PutMapping("/{id}/bio")
+    public User updateBio(@PathVariable String id, @RequestBody String bio) {
+        return userService.updateBio(id, bio);
+    }
 }
+
 

@@ -21,7 +21,7 @@ public class ChatService {
     private final UserService userService;
     private final SimpMessagingTemplate messaging;
 
-    public void sendMessage(Long streamId, Long userId, String content) {
+    public void sendMessage(Long streamId, String userId, String content) {
 
         // IA revisa el mensaje
         String moderationResult = moderationService.checkMessage(content);
@@ -46,7 +46,7 @@ public class ChatService {
                 .streamId(streamId)
                 .sender(user)
                 .content(content)
-                .badge("sub") // puedes mejorarlo después
+                .badge("sub")
                 .color("#8b5cf6")
                 .timestamp(LocalDateTime.now())
                 .moderated(false)
@@ -62,4 +62,5 @@ public class ChatService {
         return messageRepository.findByStreamIdOrderByTimestampAsc(streamId);
     }
 }
+
 

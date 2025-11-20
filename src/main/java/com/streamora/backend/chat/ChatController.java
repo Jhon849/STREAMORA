@@ -15,7 +15,7 @@ public class ChatController {
     @PostMapping("/{streamId}/send")
     public void sendMessage(
             @PathVariable Long streamId,
-            @RequestParam Long userId,
+            @RequestParam String userId,   // <-- CAMBIO
             @RequestParam String message
     ) {
         chatService.sendMessage(streamId, userId, message);
@@ -26,5 +26,6 @@ public class ChatController {
         return chatService.getMessages(streamId);
     }
 }
+
 
 

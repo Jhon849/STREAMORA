@@ -6,10 +6,11 @@ import java.util.Optional;
 
 public interface StreamRepository extends JpaRepository<Stream, Long> {
 
-    Optional<Stream> findByUserIdAndLiveTrue(Long userId);
+    Optional<Stream> findByUserIdAndLiveTrue(String userId); // ← FIX
 
     List<Stream> findByLiveTrue();
 }
+
 
 
 

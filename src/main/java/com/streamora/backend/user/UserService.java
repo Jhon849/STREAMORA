@@ -17,9 +17,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
 
-    // =======================================================
-    //  VALIDACIONES
-    // =======================================================
+    // ===========================
+    // VALIDACIONES
+    // ===========================
 
     public boolean emailExists(String email) {
         return userRepository.existsByEmail(email);
@@ -29,9 +29,9 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
-    // =======================================================
-    //  CREAR USUARIO (siempre con createdAt)
-    // =======================================================
+    // ===========================
+    // CREAR USUARIO
+    // ===========================
 
     public User createUser(String username, String email, String encryptedPassword, UserRole role) {
 
@@ -40,35 +40,35 @@ public class UserService {
                 .email(email)
                 .password(encryptedPassword)
                 .role(role)
-                .createdAt(LocalDateTime.now()) // <-- siempre creado
+                .createdAt(LocalDateTime.now())
                 .build();
 
         return userRepository.save(user);
     }
 
-    // =======================================================
-    //  LOGIN
-    // =======================================================
+    // ===========================
+    // LOGIN
+    // ===========================
 
     public Optional<User> getByEmail(String email) {
         return userRepository.findByEmail(email)
                 .map(this::fixCreatedAtSafely);
     }
 
-    // =======================================================
-    //  OBTENER USUARIO POR ID  (ARREGLA createdAt)
-    // =======================================================
+    // ===========================
+    // OBTENER USER POR ID
+    // ===========================
 
-    public User getUser(Long id) {
+    public User getUser(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return fixCreatedAtSafely(user);
     }
 
-    // =======================================================
-    //  OBTENER TODOS LOS USUARIOS (ARREGLA createdAt)
-    // =======================================================
+    // ===========================
+    // TODOS LOS USUARIOS
+    // ===========================
 
     public List<User> getAllUsers() {
         List<User> users = userRepository.findAll();
@@ -76,9 +76,9 @@ public class UserService {
         return users;
     }
 
-    // =======================================================
-    //  MÉTODO UNIVERSAL PARA ARREGLAR createdAt == null
-    // =======================================================
+    // ===========================
+    // ARREGLAR createdAt si está null
+    // ===========================
 
     private User fixCreatedAtSafely(User user) {
         if (user.getCreatedAt() == null) {
@@ -88,33 +88,40 @@ public class UserService {
         return user;
     }
 
-    // =======================================================
-    //  SUBIR AVATAR
-    // =======================================================
+    // ===========================
+    // SUBIR AVATAR
+    // ===========================
 
-    public User uploadAvatar(Long id, MultipartFile file) throws IOException {
-        User user = getUser(id); // <-- ya pasa por el fix
-
+    public User uploadAvatar(String id, MultipartFile file) throws IOException {
+        User user = getUser(id);
         String url = cloudinaryService.upload(file);
         user.setAvatarUrl(url);
-
         return userRepository.save(user);
     }
 
-    // =======================================================
-    //  SUBIR BANNER
-    // =======================================================
+    // ===========================
+    // SUBIR BANNER
+    // ===========================
 
-    public User uploadBanner(Long id, MultipartFile file) throws IOException {
-        User user = getUser(id); // <-- ya pasa por el fix
-
+    public User uploadBanner(String id, MultipartFile file) throws IOException {
+        User user = getUser(id);
         String url = cloudinaryService.upload(file);
         user.setBannerUrl(url);
-
         return userRepository.save(user);
     }
 
+    // ===========================
+    // EDITAR BIO
+    // ===========================
+
+    public User updateBio(String id, String bio) {
+        User user = getUser(id);
+        user.setBio(bio);
+        return userRepository.save(user);
+    }
 }
+  
+
 
 
 

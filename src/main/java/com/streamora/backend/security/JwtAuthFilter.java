@@ -19,7 +19,7 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final com.streamora.backend.user.UserDetailsServiceImpl userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(
@@ -28,49 +28,41 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
+        final String header = request.getHeader("Authorization");
 
-        // 👉 Si NO hay token, dejar pasar.
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7);
-        String email = null;
+        String token = header.substring(7);
+        String username = jwtService.extractUsername(token);
 
-        // 👉 Evita excepciones cuando el token es inválido / corrupto.
-        try {
-            email = jwtService.extractEmail(token);
-        } catch (Exception e) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            if (jwtService.isTokenValid(token, userDetails.getUsername())) {
 
-            if (jwtService.isTokenValid(token, email)) {
-
-                UsernamePasswordAuthenticationToken authToken =
+                UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
                                 userDetails.getAuthorities()
                         );
 
-                authToken.setDetails(
+                auth.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }
 
         filterChain.doFilter(request, response);
     }
 }
+
 
 
 
