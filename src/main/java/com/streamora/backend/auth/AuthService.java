@@ -18,7 +18,7 @@ public class AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final EmailService emailService; // 🔥 agregado (si ya existe, está perfecto)
+    private final EmailService emailService; // 🔥 Necesario para enviar correos
 
     // ============================
     //        REGISTER
@@ -36,7 +36,7 @@ public class AuthService {
         // Crear la contraseña cifrada
         String encryptedPassword = passwordEncoder.encode(request.getPassword());
 
-        // Crear usuario normalmente (tu código)
+        // Crear usuario
         User user = userService.createUser(
                 request.getUsername(),
                 request.getEmail(),
@@ -45,7 +45,7 @@ public class AuthService {
         );
 
         // =============================
-        //   CÓDIGO DE VERIFICACIÓN
+        //    GENERAR CÓDIGO EMAIL
         // =============================
         String code = String.format("%06d", new java.util.Random().nextInt(999999));
 
@@ -53,13 +53,14 @@ public class AuthService {
         user.setVerificationExpiresAt(LocalDateTime.now().plusMinutes(15));
         user.setEmailVerified(false);
 
-        // Guardar con los nuevos datos
         userService.saveUser(user);
 
-        // 🔥 Enviar "correo" FAKE al log
+        // =============================
+        //    ENVIAR CÓDIGO POR EMAIL
+        // =============================
         emailService.sendVerificationCode(user.getEmail(), code);
 
-        // 🔥 No devolver JWT; el usuario debe verificar su email primero
+        // No devolver JWT todavía
         return new AuthResponse("PENDING_VERIFICATION");
     }
 
@@ -71,21 +72,21 @@ public class AuthService {
         User user = userService.getByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
-        // Validar contraseña
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 
-        // 🚨 Bloquear login si el email no está verificado
+        // 🚨 Bloquear login si NO está verificado
         if (!user.isEmailVerified()) {
             throw new RuntimeException("Email not verified");
         }
 
-        // Login correcto → generar token
+        // Login OK
         String token = jwtService.generateToken(user.getEmail());
         return new AuthResponse(token);
     }
 }
+
 
 
 
