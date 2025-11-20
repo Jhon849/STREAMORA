@@ -35,5 +35,6 @@ public class User {
     // 🔥 NUEVO: Banner del perfil
     private String bannerUrl;
 
-    private LocalDateTime createdAt;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

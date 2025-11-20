@@ -17,9 +17,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
 
-    // =============================
-    // 🔍 VALIDACIONES PARA REGISTER
-    // =============================
+    // =======================================================
+    //  USER CREATION VALIDATIONS
+    // =======================================================
+
     public boolean emailExists(String email) {
         return userRepository.existsByEmail(email);
     }
@@ -28,9 +29,10 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
-    // =============================
-    // 🧩 CREACIÓN DE USUARIO
-    // =============================
+    // =======================================================
+    //  CREATE USER
+    // =======================================================
+
     public User createUser(String username, String email, String encryptedPassword, UserRole role) {
 
         User user = User.builder()
@@ -44,25 +46,42 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // =============================
-    // 🔍 LOGIN (usa Optional)
-    // =============================
+    // =======================================================
+    //  LOGIN
+    // =======================================================
+
     public Optional<User> getByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
     // =======================================================
-    // MÉTODOS QUE YA TENÍAS (NO SE BORRAN)
+    //  GET ALL USERS
     // =======================================================
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
+    // =======================================================
+    //  GET USER BY ID  (fixed createdAt null issue)
+    // =======================================================
+
     public User getUser(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 🔥 FIX: Ensure createdAt is never null
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(LocalDateTime.now());
+            userRepository.save(user);
+        }
+
+        return user;
     }
+
+    // =======================================================
+    //  UPLOAD AVATAR
+    // =======================================================
 
     public User uploadAvatar(Long id, MultipartFile file) throws IOException {
         User user = getUser(id);
@@ -73,6 +92,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // =======================================================
+    //  UPLOAD BANNER
+    // =======================================================
+
     public User uploadBanner(Long id, MultipartFile file) throws IOException {
         User user = getUser(id);
 
@@ -81,6 +104,8 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
 }
+
 
 

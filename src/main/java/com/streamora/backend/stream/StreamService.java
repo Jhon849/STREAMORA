@@ -17,22 +17,32 @@ public class StreamService {
     private final UserService userService;
 
     // ========================
-    //   INICIAR STREAM
+    //   START STREAM
     // ========================
     public Stream startStream(Long userId, String title, String description) {
 
         User user = userService.getUser(userId);
 
-        // Buscar si ya tiene un stream activo
+        // If user.createdAt is null → fix it
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(LocalDateTime.now());
+        }
+
+        // Check if the user already has a live stream
         Stream active = streamRepository.findByUserIdAndLiveTrue(userId).orElse(null);
 
         if (active != null) {
             active.setTitle(title);
             active.setDescription(description);
+
+            if (active.getCreatedAt() == null) {
+                active.setCreatedAt(LocalDateTime.now());
+            }
+
             return streamRepository.save(active);
         }
 
-        // Crear nuevo stream
+        // Create a new stream
         Stream stream = Stream.builder()
                 .title(title)
                 .description(description)
@@ -48,7 +58,7 @@ public class StreamService {
     }
 
     // ========================
-    //   DETENER STREAM
+    //   STOP STREAM
     // ========================
     public Stream stopStream(Long userId) {
 
@@ -61,12 +71,28 @@ public class StreamService {
     }
 
     // ========================
-    //   OBTENER STREAMS EN VIVO
+    //   GET LIVE STREAMS
     // ========================
     public List<Stream> getActiveStreams() {
-        return streamRepository.findByLiveTrue();
+        List<Stream> streams = streamRepository.findByLiveTrue();
+
+        for (Stream s : streams) {
+
+            // Fix stream createdAt null
+            if (s.getCreatedAt() == null) {
+                s.setCreatedAt(LocalDateTime.now());
+            }
+
+            // Fix user createdAt null
+            if (s.getUser() != null && s.getUser().getCreatedAt() == null) {
+                s.getUser().setCreatedAt(LocalDateTime.now());
+            }
+        }
+
+        return streams;
     }
 }
+
 
 
 
