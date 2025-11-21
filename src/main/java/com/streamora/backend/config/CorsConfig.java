@@ -15,15 +15,16 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                            "https://streamaora-space.vercel.app", // dominio REAL del frontend
-                            "https://streamora.space",             // si también funciona aquí
-                            "http://localhost:5173",
-                            "http://localhost:3000"
+                                "http://localhost:5173",
+                                "https://streamora-space.vercel.app",
+                                "https://streamora-space-6tyx9s2x8-oskar-ortizs-projects.vercel.app"
                         )
-                        .allowedMethods("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowCredentials(false)
+                        .maxAge(3600);
             }
         };
     }
 }
+
