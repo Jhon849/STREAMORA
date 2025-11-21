@@ -18,7 +18,6 @@ public class EmailService {
     public void sendVerificationCode(String to, String code) {
         String subject = "Verifica tu correo — Streamora";
         String html = getVerificationTemplate(code);
-
         sendEmail(to, subject, html);
     }
 
@@ -26,7 +25,6 @@ public class EmailService {
         String subject = "Restablece tu contraseña — Streamora";
         String link = "https://streamora-space.vercel.app/reset-password?token=" + token;
         String html = getResetTemplate(link);
-
         sendEmail(to, subject, html);
     }
 
@@ -36,7 +34,7 @@ public class EmailService {
             Emails emails = resend.emails();
 
             CreateEmailOptions request = CreateEmailOptions.builder()
-                    .from("onboarding@resend.dev")
+                    .from("onboarding@resend.dev")   // IMPORTANTE: sin alias
                     .to(to)
                     .subject(subject)
                     .html(html)
