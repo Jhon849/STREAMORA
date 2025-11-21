@@ -15,6 +15,9 @@ public class EmailService {
     @Value("${RESEND_API_KEY}")
     private String apiKey;
 
+    @Value("${RESEND_FROM:no-reply@mail.streamora.space}")
+    private String fromEmail;
+
     public void sendVerificationCode(String to, String code) {
         String subject = "Verifica tu correo — Streamora";
         String html = getVerificationTemplate(code);
@@ -34,7 +37,7 @@ public class EmailService {
             Emails emails = resend.emails();
 
             CreateEmailOptions request = CreateEmailOptions.builder()
-                    .from("onboarding@resend.dev")   // IMPORTANTE: sin alias
+                    .from(fromEmail)                      // ← ahora sí es válido
                     .to(to)
                     .subject(subject)
                     .html(html)
