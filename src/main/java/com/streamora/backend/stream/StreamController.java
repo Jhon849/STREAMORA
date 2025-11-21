@@ -1,8 +1,9 @@
 package com.streamora.backend.stream;
 
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import com.streamora.backend.stream.dto.StartStreamRequest;
+import com.streamora.backend.stream.dto.StreamEndpoints;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,32 +15,40 @@ public class StreamController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final StreamService streamService;
+    private final StreamConfigService streamConfigService;
+    private final LivepushService livepushService;
 
+    // ===============================
+    // 🔥 Start a live stream
+    // ===============================
     @PostMapping("/start")
     public Stream startStream(
             @RequestParam String userId,
             @RequestBody StartStreamRequest request
     ) {
-        // 🔒 Validación simple para evitar solicitudes vacías
         if (request == null || request.getTitle() == null || request.getDescription() == null) {
             throw new RuntimeException("Title and description are required");
         }
 
-        // ✔️ Ahora enviamos TODO el DTO (title + description + category + thumbnail)
         return streamService.startStream(userId, request);
     }
 
+    // ===============================
+    // 🔥 Stop a live stream
+    // ===============================
     @PostMapping("/stop")
     public Stream stopStream(@RequestParam String userId) {
         return streamService.stopStream(userId);
     }
 
-    // 🔥 Alias para el frontend
     @PostMapping("/end")
     public Stream endStream(@RequestParam String userId) {
         return streamService.stopStream(userId);
     }
 
+    // ===============================
+    // 🔥 Get all live streams
+    // ===============================
     @GetMapping("/live")
     public List<Stream> getLiveStreams() {
         return streamService.getActiveStreams();
@@ -50,12 +59,17 @@ public class StreamController {
         return streamService.getActiveStreams();
     }
 
-    // 🔥 Obtener stream por ID (lo pide frontend)
+    // ===============================
+    // 🔥 Get stream details by ID
+    // ===============================
     @GetMapping("/{id}")
     public Stream getStream(@PathVariable Long id) {
         return streamService.getStreamById(id);
     }
 
+    // ===============================
+    // 🔥 Viewer count system
+    // ===============================
     @PostMapping("/{id}/view")
     public Stream addViewer(@PathVariable Long id) {
         Stream updated = streamService.addViewer(id);
@@ -79,7 +93,23 @@ public class StreamController {
 
         return updated;
     }
+
+    // ===============================
+    // 🔥 Livepush endpoints (RTMP + Player)
+    // ===============================
+    @GetMapping("/{userId}/endpoints")
+    public StreamEndpoints getEndpoints(@PathVariable String userId) {
+
+        StreamConfig config = streamConfigService.getMyConfig(userId);
+
+        return livepushService.getEndpoints(
+                userId,
+                config.getStreamKey()
+        );
+    }
 }
+
+
 
 
 
