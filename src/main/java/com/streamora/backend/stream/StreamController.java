@@ -18,9 +18,9 @@ public class StreamController {
     private final StreamConfigService streamConfigService;
     private final LivepushService livepushService;
 
-    // ===============================
-    // 🔥 Start a live stream
-    // ===============================
+    // ===========================
+    // 🔥 Start Stream
+    // ===========================
     @PostMapping("/start")
     public Stream startStream(
             @RequestParam String userId,
@@ -33,9 +33,9 @@ public class StreamController {
         return streamService.startStream(userId, request);
     }
 
-    // ===============================
-    // 🔥 Stop a live stream
-    // ===============================
+    // ===========================
+    // 🔥 Stop Stream
+    // ===========================
     @PostMapping("/stop")
     public Stream stopStream(@RequestParam String userId) {
         return streamService.stopStream(userId);
@@ -46,9 +46,9 @@ public class StreamController {
         return streamService.stopStream(userId);
     }
 
-    // ===============================
-    // 🔥 Get all live streams
-    // ===============================
+    // ===========================
+    // 🔥 Live streams
+    // ===========================
     @GetMapping("/live")
     public List<Stream> getLiveStreams() {
         return streamService.getActiveStreams();
@@ -59,44 +59,34 @@ public class StreamController {
         return streamService.getActiveStreams();
     }
 
-    // ===============================
-    // 🔥 Get stream details by ID
-    // ===============================
+    // ===========================
+    // 🔥 Get stream by ID
+    // ===========================
     @GetMapping("/{id}")
     public Stream getStream(@PathVariable Long id) {
         return streamService.getStreamById(id);
     }
 
-    // ===============================
-    // 🔥 Viewer count system
-    // ===============================
+    // ===========================
+    // 🔥 Viewers
+    // ===========================
     @PostMapping("/{id}/view")
     public Stream addViewer(@PathVariable Long id) {
         Stream updated = streamService.addViewer(id);
-
-        messagingTemplate.convertAndSend(
-                "/topic/streams/" + id + "/viewers",
-                updated.getViewerCount()
-        );
-
+        messagingTemplate.convertAndSend("/topic/streams/" + id + "/viewers", updated.getViewerCount());
         return updated;
     }
 
     @PostMapping("/{id}/leave")
     public Stream removeViewer(@PathVariable Long id) {
         Stream updated = streamService.removeViewer(id);
-
-        messagingTemplate.convertAndSend(
-                "/topic/streams/" + id + "/viewers",
-                updated.getViewerCount()
-        );
-
+        messagingTemplate.convertAndSend("/topic/streams/" + id + "/viewers", updated.getViewerCount());
         return updated;
     }
 
-    // ===============================
-    // 🔥 Livepush endpoints (RTMP + Player)
-    // ===============================
+    // ===========================
+    // 🔥 NEW: RTMP + Player endpoints for frontend
+    // ===========================
     @GetMapping("/{userId}/endpoints")
     public StreamEndpoints getEndpoints(@PathVariable String userId) {
 
@@ -108,6 +98,8 @@ public class StreamController {
         );
     }
 }
+
+
 
 
 

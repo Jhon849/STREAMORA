@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -32,7 +33,7 @@ public class LivepushService {
         try {
             String encodedKey = URLEncoder.encode(streamKey, StandardCharsets.UTF_8);
 
-            String rtmpUrl = baseRtmpUrl;  // unchanged
+            String rtmpUrl = baseRtmpUrl;  
             String playerUrl = basePlayerUrl + encodedKey;
             String thumbnailUrl = baseThumbnailUrl + encodedKey + ".jpg";
             String playbackUrl = playbackBaseUrl + encodedKey + "/index.m3u8";
@@ -51,4 +52,5 @@ public class LivepushService {
         }
     }
 }
+
 

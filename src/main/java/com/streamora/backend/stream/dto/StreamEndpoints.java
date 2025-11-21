@@ -11,9 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StreamEndpoints {
 
-    private String rtmpUrl;       // rtmp://stream.livepush.io/live/
-    private String streamKey;     // clave única del streamer
-    private String playerUrl;     // https://player.livepush.io/?token=...
-    private String thumbnailUrl;  // thumbnail generado por Livepush
-    private String playbackUrl;   // HLS o grabación
+    private String rtmpUrl;       // RTMP server
+    private String streamKey;     // User unique stream key
+
+    private String playerUrl;     // Livepush player URL
+    private String thumbnailUrl;  // Thumbnail URL
+    private String playbackUrl;   // HLS playback URL
 }
+
