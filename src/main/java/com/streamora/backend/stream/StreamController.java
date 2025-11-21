@@ -20,11 +20,13 @@ public class StreamController {
             @RequestParam String userId,
             @RequestBody StartStreamRequest request
     ) {
-        return streamService.startStream(
-                userId,
-                request.getTitle(),
-                request.getDescription()
-        );
+        // 🔒 Validación simple para evitar solicitudes vacías
+        if (request == null || request.getTitle() == null || request.getDescription() == null) {
+            throw new RuntimeException("Title and description are required");
+        }
+
+        // ✔️ Ahora enviamos TODO el DTO (title + description + category + thumbnail)
+        return streamService.startStream(userId, request);
     }
 
     @PostMapping("/stop")
@@ -78,6 +80,8 @@ public class StreamController {
         return updated;
     }
 }
+
+
 
 
 

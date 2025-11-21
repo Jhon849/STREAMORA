@@ -27,10 +27,13 @@ public class Stream {
     private String streamKey;
 
     @Column(name = "viewer_count")
-private int viewerCount = 0;
-
+    private int viewerCount = 0;
 
     private boolean live;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private StreamStatus status;
 
     @Column(name = "thumbnail_url")
     private String thumbnailUrl;
@@ -45,6 +48,8 @@ private int viewerCount = 0;
     @JoinColumn(name = "user_id")
     private User user;
 }
+
+
 
 
 

@@ -24,6 +24,10 @@ public class Message {
 
     private String content;
 
+    // 🔥 Nuevo: Rol del usuario en el chat (streamer, mod, vip, founder, etc.)
+    @Enumerated(EnumType.STRING)
+    private ChatRole role;
+
     private String badge; // mod, sub, vip, founder
 
     private String color; // color del usuario
