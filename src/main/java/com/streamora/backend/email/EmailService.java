@@ -1,26 +1,91 @@
 package com.streamora.backend.email;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
 
 @Service
-@Slf4j
 public class EmailService {
 
-    public void sendVerificationCode(String to, String code) {
+    @Value("${resend.api.key}")
+    private String apiKey;
 
-        log.warn("⚠️ (DEBUG) SIMULANDO EMAIL — NO SE ENVIA CORREO");
-        log.warn("📧 Enviar verificación a: {}", to);
-        log.warn("🔐 CÓDIGO DE VERIFICACIÓN: {}", code);
-    }
+    @Value("${resend.from.email}")
+    private String fromEmail;
 
-    public void sendResetToken(String to, String token) {
+    private final RestTemplate restTemplate = new RestTemplate();
 
-        log.warn("⚠️ (DEBUG) SIMULANDO EMAIL — NO SE ENVIA CORREO");
-        log.warn("📧 Enviar reset a: {}", to);
-        log.warn("🔐 TOKEN DE RESET: {}", token);
+    public void sendVerificationEmail(String to, String username, String token) {
+
+        String htmlBody = """
+            <div style="font-family: 'Inter', Arial, sans-serif; 
+                        background:#fafafa; 
+                        color:#111; 
+                        padding:40px; 
+                        border-radius:12px; 
+                        max-width:480px; 
+                        margin:auto;
+                        border:1px solid #eee;">
+
+                <h2 style="text-align:center; 
+                           font-size:26px; 
+                           margin-bottom:10px;
+                           color:#7c3aed;">
+                    Bienvenido a Streamora ✨
+                </h2>
+
+                <p style="font-size:15px; line-height:1.6; text-align:center; margin-bottom:30px;">
+                    ¡Gracias por registrarte, %s! Antes de continuar, necesitamos confirmar tu correo electrónico.
+                </p>
+
+                <div style="text-align:center; margin:30px 0;">
+                    <div style="font-size:34px;
+                                letter-spacing:4px;
+                                font-weight:700;
+                                padding:14px 0;
+                                background:#7c3aed;
+                                color:white;
+                                border-radius:10px;">
+                        %s
+                    </div>
+                </div>
+
+                <p style="font-size:14px; text-align:center; color:#555;">
+                    Este código expirará en <strong>15 minutos</strong>.
+                </p>
+
+                <hr style="margin:35px 0; border:none; border-top:1px solid #ddd;">
+
+                <p style="font-size:12px; text-align:center; color:#888;">
+                    Si no creaste esta cuenta, puedes ignorar este mensaje.  
+                    <br>© Streamora.space
+                </p>
+            </div>
+        """.formatted(username, token);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(apiKey);
+
+        Map<String, Object> body = Map.of(
+                "from", fromEmail,
+                "to", to,
+                "subject", "Verifica tu cuenta — Streamora",
+                "html", htmlBody
+        );
+
+        restTemplate.postForEntity(
+                "https://api.resend.com/emails",
+                new HttpEntity<>(body, headers),
+                String.class
+        );
     }
 }
+
+
 
 
 
