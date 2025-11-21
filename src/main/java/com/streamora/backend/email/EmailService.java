@@ -18,6 +18,12 @@ public class EmailService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    // 🔥 MÉTODO QUE NECESITABA EL AuthService
+    public void sendVerificationCode(String email, String code) {
+        sendVerificationEmail(email, "Usuario", code);
+    }
+
+    // 🔥 Tu método original
     public void sendVerificationEmail(String to, String username, String token) {
 
         String htmlBody = """
@@ -84,6 +90,7 @@ public class EmailService {
         );
     }
 }
+
 
 
 
