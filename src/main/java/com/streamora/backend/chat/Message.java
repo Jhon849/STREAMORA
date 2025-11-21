@@ -22,18 +22,31 @@ public class Message {
     @JoinColumn(name = "user_id")
     private User sender;
 
-    private String content;
+    private String content; // texto final mostrado al público
 
-    // 🔥 Nuevo: Rol del usuario en el chat (streamer, mod, vip, founder, etc.)
+    // 🔥 Nuevo: texto original antes de la moderación IA
+    @Column(columnDefinition = "TEXT")
+    private String originalContent;
+
+    // 🔥 Nuevo: razón de moderación (explicación IA)
+    @Column(columnDefinition = "TEXT")
+    private String moderationReason;
+
+    // 🔥 Nuevo: puntuación de toxicidad (0-100)
+    private Integer toxicityScore;
+
+    // 🔥 Ya existía: si IA lo eliminó o alteró
+    private boolean moderated;
+
+    // 🔥 Ya existía: Roles
     @Enumerated(EnumType.STRING)
     private ChatRole role;
 
-    private String badge; // mod, sub, vip, founder
+    private String badge;
 
-    private String color; // color del usuario
+    private String color;
 
     private LocalDateTime timestamp;
-
-    private boolean moderated; // true si IA lo eliminó
 }
+
 
