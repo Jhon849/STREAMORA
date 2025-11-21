@@ -16,6 +16,8 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 🔥 FIX: Evita que Hibernate cree dos columnas (stream_id y streamId)
+    @Column(name = "stream_id", nullable = false)
     private Long streamId;
 
     @ManyToOne
@@ -48,5 +50,6 @@ public class Message {
 
     private LocalDateTime timestamp;
 }
+
 
 

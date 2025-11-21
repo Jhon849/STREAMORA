@@ -5,8 +5,11 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "moderation_logs")
 public class ModerationLog {
 
@@ -15,12 +18,12 @@ public class ModerationLog {
     private Long id;
 
     private Long streamId;
+    private String userId;
 
-    private String userId; // ← FIX: antes era Long, ahora String
-
+    @Column(columnDefinition = "TEXT")
     private String originalMessage;
+
     private String reason;
 
     private LocalDateTime timestamp;
 }
-
