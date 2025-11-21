@@ -18,12 +18,16 @@ public class EmailService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // 🔥 MÉTODO QUE NECESITABA EL AuthService
+    // ==========================================================
+    //                 VERIFICATION CODE (EL QUE LLAMA AuthService)
+    // ==========================================================
     public void sendVerificationCode(String email, String code) {
         sendVerificationEmail(email, "Usuario", code);
     }
 
-    // 🔥 Tu método original
+    // ==========================================================
+    //                 VERIFICATION EMAIL (TU MÉTODO ORIGINAL)
+    // ==========================================================
     public void sendVerificationEmail(String to, String username, String token) {
 
         String htmlBody = """
@@ -80,6 +84,60 @@ public class EmailService {
                 "from", fromEmail,
                 "to", to,
                 "subject", "Verifica tu cuenta — Streamora",
+                "html", htmlBody
+        );
+
+        restTemplate.postForEntity(
+                "https://api.resend.com/emails",
+                new HttpEntity<>(body, headers),
+                String.class
+        );
+    }
+
+    // ==========================================================
+    //                RESET PASSWORD EMAIL (FALTABA ESTE)
+    // ==========================================================
+    public void sendResetToken(String email, String token) {
+
+        String htmlBody = """
+            <div style="font-family: 'Inter', Arial, sans-serif;
+                        background:#fafafa;
+                        color:#111;
+                        padding:40px;
+                        border-radius:12px;
+                        max-width:480px;
+                        margin:auto;
+                        border:1px solid #eee;">
+                
+                <h2 style="text-align:center; color:#7c3aed;">
+                    Restablecer contraseña
+                </h2>
+
+                <p style="font-size:15px; line-height:1.6; text-align:center;">
+                    Haz clic en el botón para restablecer tu contraseña:
+                </p>
+
+                <div style="text-align:center; margin:30px 0;">
+                    <a href="https://streamora.space/reset-password?token=%s"
+                       style="background:#7c3aed; padding:12px 22px; color:white; text-decoration:none; border-radius:8px;">
+                        Restablecer contraseña
+                    </a>
+                </div>
+
+                <p style="font-size:12px; text-align:center; color:#555;">
+                    Si no solicitaste el cambio, simplemente ignora este correo.
+                </p>
+            </div>
+        """.formatted(token);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(apiKey);
+
+        Map<String, Object> body = Map.of(
+                "from", fromEmail,
+                "to", email,
+                "subject", "Restablecer contraseña — Streamora",
                 "html", htmlBody
         );
 
